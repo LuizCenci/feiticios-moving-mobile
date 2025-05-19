@@ -107,7 +107,8 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    backgroundColor: '#fff',
+    borderColor: '#6C47A3',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -143,5 +144,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: '600',
     color: '#fff',
+    fontSize: 16,
   },
 });
