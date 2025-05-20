@@ -10,7 +10,8 @@ export default function index(){
             <Button title='filter' onPress={() => router.push('/filter')}/>
             <Button title='login' onPress={() => router.push('/login')}/>
             <Button title='cadastro-servico' onPress={() => router.push('/cadastro-servico')}/>
+            <Button title='agendamento' onPress={() => router.push('/agendamento')}/>
         </View>
     );
-    
+
 }
