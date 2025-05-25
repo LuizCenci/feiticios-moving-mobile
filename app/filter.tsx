@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function FiltrosScreen() {
@@ -67,16 +68,17 @@ export default function FiltrosScreen() {
       <View style={styles.starContainer}>
         {[1, 2, 3, 4, 5].map((num) => (
           <TouchableOpacity key={num} onPress={() => setAvaliacao(num)}>
-            <Ionicons
-              name={num <= avaliacao ? 'star' : 'star-outline'}
-              size={28}
-              color="#ffc107"
+            <FontAwesome
+              name="star"
+              size={30} 
+              color={num <= avaliacao ? '#8A2BE2' : '#ccc'}
+              style={{ marginHorizontal: 2 }}
             />
           </TouchableOpacity>
         ))}
       </View>
 
-      <TouchableOpacity style={styles.applyButton}>
+      <TouchableOpacity style={styles.applyButton} onPress={() => router.push('/agendamento')}>
         <Text style={styles.buttonText}>Aplicar Filtros</Text>
       </TouchableOpacity>
 

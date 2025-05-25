@@ -29,7 +29,7 @@ export default function Cadastro() {
     return (
         <ScrollView style={{ flex: 1, backgroundColor: '#FEF7FF' }} contentContainerStyle={{ alignItems: 'center', paddingVertical: 40 }}>
             <View style={{ width: '90%', alignItems: 'center' }}>
-                <Image source={require('../assets/images/cauldron.jpeg')} style={{ width: 100, height: 100, marginBottom: 20 }} />
+                <Image source={require('../assets/images/cauldron.png')} style={{ width: 100, height: 100, marginBottom: 20 }} />
                 <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#000', marginBottom: 30 }}>Criar conta</Text>
 
                 {/* Nome */}

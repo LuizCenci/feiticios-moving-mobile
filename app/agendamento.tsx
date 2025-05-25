@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
     Button,
     Card,
@@ -41,7 +42,7 @@ export default function Agendamento() {
         <PaperProvider>
             <ScrollView contentContainerStyle={styles.container}>
                 <Image
-                    source={require('../assets/images/cauldron.jpeg')}
+                    source={require('../assets/images/cauldron.png')}
                     style={{ width: 60, height: 60, marginBottom: 5 }}
                 />
                 <Text style={styles.title}>Feitiços moving</Text>
@@ -98,6 +99,7 @@ export default function Agendamento() {
 
                         <View style={styles.menuContainer}>
                             <Text style={styles.pickerLabel}>Escolha um mudanceiro</Text>
+                            
                             <Button
                                 mode="outlined"
                                 onPress={openMenu}
@@ -108,7 +110,9 @@ export default function Agendamento() {
                             >
                                 {mudanceiro || 'Selecione...'}
                             </Button>
-
+                            {/* <TouchableOpacity style={styles.botao}>
+                                <Text>Filtrar Mudanceiros</Text>
+                            </TouchableOpacity>  */}
                             <Menu
                                 visible={menuVisible}
                                 onDismiss={() => setMenuVisible(false)}
@@ -149,7 +153,7 @@ export default function Agendamento() {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#fdf4ff',
+        backgroundColor: '#FEF7FF',
         flexGrow: 1,
         alignItems: 'center',
     },
@@ -213,4 +217,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#d946ef',
         marginTop: 8,
     },
+    botao_filter: {
+    backgroundColor: '#1c81e7',
+    padding: 10,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+  },
 });

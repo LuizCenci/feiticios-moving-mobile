@@ -19,7 +19,7 @@ const Avaliacao = () => {
         <TouchableOpacity key={i} onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i })}>
           <FontAwesome
             name="star"
-            size={30}
+            size={30} 
             color={i <= avaliacoes[category] ? '#8A2BE2' : '#ccc'}
             style={{ marginHorizontal: 2 }}
           />
@@ -66,7 +66,7 @@ const Avaliacao = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f9f1ff' },
+  container: { flex: 1, padding: 20, backgroundColor: '#FEF7FF', },
   title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginVertical: 10 },
   subtitle: { fontSize: 16, marginBottom: 20, fontWeight: 'bold' },
   label: { fontSize: 16, marginTop: 10 },

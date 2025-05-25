@@ -35,7 +35,7 @@ const Login = () => {
                     <Text style={{ color: '#b765ff', fontWeight: 'bold' }}>Criar cadastro</Text>
                 </TouchableOpacity>
                 <Image
-                    source={require('../assets/images/cauldron.jpeg')}
+                    source={require('../assets/images/cauldron.png')}
                     style={{ width: 60, height: 60, marginBottom: 5, marginTop: 180 }}
                 />
                 <Text style={{ fontWeight: 'bold' }}>Feitiços moving</Text>
