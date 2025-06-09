@@ -1,7 +1,11 @@
+
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { push, ref } from 'firebase/database';
+import { auth, database } from '../src/config/firebaseconfig';
 
 const Avaliacao = () => {
   const router = useRouter();
@@ -14,79 +18,104 @@ const Avaliacao = () => {
 
   const renderStars = (category: keyof typeof avaliacoes) => {
     const stars = [];
+    const rating = avaliacoes[category];
+
     for (let i = 1; i <= 5; i++) {
+      let iconName: 'star' | 'star-half-full' | 'star-o' = 'star-o';
+
+      if (rating >= i) {
+        iconName = 'star';
+      } else if (rating >= i - 0.5) {
+        iconName = 'star-half-full';
+      }
+
       stars.push(
-        <TouchableOpacity key={i} onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i })}>
-          <FontAwesome
-            name="star"
-            size={30} 
-            color={i <= avaliacoes[category] ? '#8A2BE2' : '#ccc'}
-            style={{ marginHorizontal: 2 }}
+        <View key={i} style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i - 0.5 })}
+            style={{ width: 15, alignItems: 'flex-end' }}
+          >
+            <FontAwesome
+              name={iconName}
+              size={30}
+              color="#8A2BE2"
+              style={{ marginHorizontal: 1 }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i })}
+            style={{ width: 15 }}
           />
-        </TouchableOpacity>
+        </View>
       );
     }
+
     return <View style={styles.stars}>{stars}</View>;
   };
 
-  const handleSubmit = () => {
-    console.log('Avaliação enviada:', avaliacoes, feedback);
-    alert('Obrigado pela avaliação!');
-    router.back(); // volta para a tela anterior
+  const handleSubmit = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert('Erro', 'Usuário não autenticado.');
+      return;
+    }
+
+    const avaliacaoRef = ref(database, `avaliacoes/${user.uid}`);
+    const novaAvaliacao = {
+      ...avaliacoes,
+      feedback,
+      data: new Date().toISOString()
+    };
+
+    try {
+      await push(avaliacaoRef, novaAvaliacao);
+      Alert.alert('Sucesso', 'Avaliação enviada com sucesso!');
+      setAvaliacoes({ tempo: 0, itens: 0, atendimento: 0 });
+      setFeedback('');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Erro ao enviar avaliação:', error);
+      Alert.alert('Erro', 'Erro ao enviar avaliação. Tente novamente.');
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Avalie sua mudança</Text>
-      <Text style={styles.subtitle}>Como foi o processo de mudança?</Text>
+      <Text style={styles.title}>Avalie sua experiência:</Text>
 
-      <Text style={styles.label}>Tempo</Text>
+      <Text style={styles.label}>Tempo de entrega:</Text>
       {renderStars('tempo')}
 
-      <Text style={styles.label}>Itens em bom estado</Text>
+      <Text style={styles.label}>Condição dos itens:</Text>
       {renderStars('itens')}
 
-      <Text style={styles.label}>Atendimento</Text>
+      <Text style={styles.label}>Atendimento:</Text>
       {renderStars('atendimento')}
 
-      <Text style={styles.label}>Feedback</Text>
+      <Text style={styles.label}>Feedback:</Text>
       <TextInput
         style={styles.input}
-        placeholder="Digite seu feedback"
-        multiline
+        placeholder="Escreva aqui..."
         value={feedback}
         onChangeText={setFeedback}
+        multiline
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Enviar</Text>
+        <Text style={styles.buttonText}>Enviar Avaliação</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#FEF7FF', },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginVertical: 10 },
-  subtitle: { fontSize: 16, marginBottom: 20, fontWeight: 'bold' },
-  label: { fontSize: 16, marginTop: 10 },
-  stars: { flexDirection: 'row', marginVertical: 5 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 6,
-    padding: 10,
-    height: 100,
-    marginVertical: 10,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#8A2BE2',
-    padding: 14,
-    borderRadius: 30,
-    marginTop: 10,
-  },
-  buttonText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
+  container: { padding: 20 },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  label: { fontSize: 16, marginTop: 15 },
+  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginTop: 10, borderRadius: 5, minHeight: 80 },
+  button: { backgroundColor: '#8A2BE2', padding: 15, borderRadius: 8, marginTop: 20 },
+  buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  stars: { flexDirection: 'row', marginTop: 10 },
 });
 
 export default Avaliacao;
