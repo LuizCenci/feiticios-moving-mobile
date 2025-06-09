@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 //import Icon from 'react-native-vector-icons/Feather';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ref, get, child } from 'firebase/database';
@@ -43,10 +45,50 @@ export default function Agendamento() {
         setMudanceiros([]);
     }
     };
+    const filtrarMudanceiros = () => {
+        let filtrados = resultados;
+
+        // Filtro por localização (caso informada)
+        if (localizacao) {
+            filtrados = filtrados.filter((m) => m.localizacao?.toLowerCase() === localizacao.toLowerCase());
+        }
+
+        // Filtro por avaliação mínima (ex: 4.5)
+        if (avaliacao) {
+            const minAvaliacao = parseFloat(avaliacao as string);
+            filtrados = filtrados.filter((m) => parseFloat(m.avaliacao) >= minAvaliacao);
+        }
+
+        // Filtros por tipo de mudança (serviços oferecidos)
+        const filtrosServicos = {
+            residencial: residencial === 'true',
+            comercial: comercial === 'true',
+            fretes: fretes === 'true',
+            montagem: montagem === 'true',
+        };
+
+        // Aplica apenas os filtros que foram ativados
+        Object.entries(filtrosServicos).forEach(([tipo, ativo]) => {
+            if (ativo) {
+            filtrados = filtrados.filter((m) => m.servicos?.[tipo]);
+            }
+        });
+
+        // Atualiza os nomes exibidos no menu
+        const nomesFiltrados = filtrados.map((m) => m.nome);
+        setMudanceiros(nomesFiltrados);
+    };
+
 
     useEffect(() =>{
         buscarMudanceiros();
     }, []);
+
+    useEffect(() =>{
+        if (resultados.length > 0) {
+            filtrarMudanceiros();
+        }
+    }, [resultados, localizacao, avaliacao, residencial, comercial, fretes, montagem]);
 
     
     const [origem, setOrigem] = useState('');
@@ -130,7 +172,13 @@ export default function Agendamento() {
                         </View>
 
                         <View style={styles.menuContainer}>
-                            <Text style={styles.pickerLabel}>Escolha um mudanceiro</Text>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.pickerLabel}>Escolha um mudanceiro</Text>
+                                <TouchableOpacity style={styles.filterIcon} onPress={() => router.push('/filter')}>
+                                    <MaterialCommunityIcons name="filter-variant" size={18} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+
                             
                             <Button
                                 mode="outlined"
@@ -142,9 +190,7 @@ export default function Agendamento() {
                             >
                                 {mudanceiro || 'Selecione...'}
                             </Button>
-                            <TouchableOpacity style={styles.botao_filter} onPress={() => router.push('/filter')}>
-                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>⚙️</Text>
-                            </TouchableOpacity>
+                            
 
                             <Menu
                                 visible={menuVisible}
@@ -255,12 +301,30 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     botao_filter: {
-    backgroundColor: '#1c81e7',
-    padding: 10,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 40,
-    height: 40,
-  },
+        backgroundColor: '#1c81e7',
+        padding: 10,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 40,
+        height: 40,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+
+    filterIcon: {
+        backgroundColor: '#9b59b6', // roxo discreto
+        borderRadius: 16,
+        padding: 6,
+        marginLeft: 10,
+    },
+
+    filterText: {
+        color: '#fff',
+        fontSize: 16,
+    },
 });
