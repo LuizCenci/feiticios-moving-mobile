@@ -78,7 +78,16 @@ export default function FiltrosScreen() {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.applyButton} onPress={() => router.push('/agendamento')}>
+      <TouchableOpacity 
+        style={styles.applyButton} 
+        onPress={() => router.push({pathname: '/agendamento', params:{localizacao, 
+                                                                      residencial:String(mudancas.residencial), 
+                                                                      comercial:String(mudancas.comercial),
+                                                                      fretes:String(mudancas.fretes),
+                                                                      montagem:String(mudancas.montagem),
+                                                                      avaliacao: String(avaliacao)
+                                                                    }
+          })}>
         <Text style={styles.buttonText}>Aplicar Filtros</Text>
       </TouchableOpacity>
 

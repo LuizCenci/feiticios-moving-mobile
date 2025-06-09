@@ -1,16 +1,20 @@
 import { Lock, Mail, Truck } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {Image, ScrollView, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { app, auth, database } from '../src/config/firebaseconfig'
+import { ref, onValue } from 'firebase/database';
 
 const Login = () => {
+    const [teste, setTeste] = useState('');
     const router = useRouter();
+
 
     return (
         <ScrollView style={{ flex: 1, backgroundColor: '#FEF7FF' }} contentContainerStyle={{ alignItems: 'center', paddingVertical: 40 }}>
             {/* Tela de Login */}
             <View style={{ width: '90%', marginBottom: 40, alignItems: 'center' }}>
+                <Text>Teste: {teste}</Text>
                 <Truck color="#b765ff" size={100} />
                 <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#000', marginTop: 20, marginBottom: 30 }}>Faça Login para continuar</Text>
                 <View style={{ width: '100%', marginBottom: 20 }}>

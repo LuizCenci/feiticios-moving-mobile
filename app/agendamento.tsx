@@ -1,5 +1,8 @@
-import React, { useState, useRef } from 'react';
-import Icon from 'react-native-vector-icons/Feather';
+import React, { useState, useRef, useEffect } from 'react';
+//import Icon from 'react-native-vector-icons/Feather';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ref, get, child } from 'firebase/database';
+import { database } from '../src/config/firebaseconfig';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
     Button,
@@ -8,8 +11,44 @@ import {
     Provider as PaperProvider,
     TextInput,
 } from 'react-native-paper';
+import { Router } from 'lucide-react-native';
 
 export default function Agendamento() {
+    const router = useRouter();
+    const params = useLocalSearchParams();
+    const { localizacao, avaliacao, residencial, comercial, fretes, montagem } = useLocalSearchParams();
+    const [resultados, setResultados] = useState([]);
+    const [mudanceiros, setMudanceiros] = useState<string[]>([]);
+
+    const buscarMudanceiros = async () => {
+    try {
+        const dbRef = ref(database);
+        const snapshot = await get(child(dbRef, 'mudanceiro'));
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const mudanceirosArray = Object.values(data) as any[];
+            console.log(mudanceirosArray);
+            setResultados(mudanceirosArray); // salva os dados completos
+            setMudanceiros(mudanceirosArray.map((m) => m.nome)); // exibe só os nomes no menu
+
+        } else {
+            console.warn('Nenhum mudanceiro encontrado.');
+            setResultados([]);
+            setMudanceiros([]);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar mudanceiros:', error);
+        setResultados([]);
+        setMudanceiros([]);
+    }
+    };
+
+    useEffect(() =>{
+        buscarMudanceiros();
+    }, []);
+
+    
     const [origem, setOrigem] = useState('');
     const [destino, setDestino] = useState('');
     const [itens, setItens] = useState('');
@@ -19,13 +58,6 @@ export default function Agendamento() {
     const [mudanceiro, setMudanceiro] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
     const [anchor, setAnchor] = useState(null);
-
-    const mudanceiros = [
-        'João - 4.8 - R$150,00',
-        'Maria - 4.9 - R$170,00',
-        'Carlos - 4.7 - R$160,00',
-        'Ana - 5.0 - R$200,00',
-    ];
 
     const buttonRef = useRef(null);
 
@@ -110,26 +142,31 @@ export default function Agendamento() {
                             >
                                 {mudanceiro || 'Selecione...'}
                             </Button>
-                            {/* <TouchableOpacity style={styles.botao}>
-                                <Text>Filtrar Mudanceiros</Text>
-                            </TouchableOpacity>  */}
+                            <TouchableOpacity style={styles.botao_filter} onPress={() => router.push('/filter')}>
+                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>⚙️</Text>
+                            </TouchableOpacity>
+
                             <Menu
                                 visible={menuVisible}
                                 onDismiss={() => setMenuVisible(false)}
                                 anchor={anchor}
                                 style={styles.dropdownMenu}
-                            >
-                                {mudanceiros.map((option, index) => (
+                                >
+                                {mudanceiros.length === 0 ? (
+                                    <Menu.Item title="Nenhum disponível" disabled />
+                                ) : (
+                                    mudanceiros.map((option, index) => (
                                     <Menu.Item
                                         key={index}
                                         onPress={() => {
-                                            setMudanceiro(option);
-                                            setMenuVisible(false);
+                                        setMudanceiro(option);
+                                        setMenuVisible(false);
                                         }}
                                         title={option}
-                                        titleStyle={{ color: '#fff' }}
+                                        titleStyle={{ color: '#000' }}
                                     />
-                                ))}
+                                    ))
+                                )}
                             </Menu>
                         </View>
 

@@ -2,10 +2,14 @@ import { Lock, Mail, Truck } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { app, auth, database } from '../src/config/firebaseconfig'
 
 export default function Cadastro() {
     const router = useRouter();
 
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
     const [cpf, setCpf] = useState('');
     const [dataNascimento, setDataNascimento] = useState('');
 
