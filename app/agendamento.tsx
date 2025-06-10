@@ -117,7 +117,7 @@ export default function Agendamento() {
                     source={require('../assets/images/cauldron.png')}
                     style={{ width: 60, height: 60, marginBottom: 5 }}
                 />
-                <Text style={styles.title}>aaaaa</Text>
+                <Text style={styles.title}>Feitiços moving</Text>
 
                 <Card style={styles.card}>
                     <Card.Content>
