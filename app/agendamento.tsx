@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 //import Icon from 'react-native-vector-icons/Feather';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ref, get, child } from 'firebase/database';
-import { database } from '../src/config/firebaseconfig';
+import { child, get, ref } from 'firebase/database';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
     Button,
@@ -13,7 +11,7 @@ import {
     Provider as PaperProvider,
     TextInput,
 } from 'react-native-paper';
-import { Router } from 'lucide-react-native';
+import { database } from '../src/config/firebaseconfig';
 
 export default function Agendamento() {
     const router = useRouter();
@@ -119,7 +117,7 @@ export default function Agendamento() {
                     source={require('../assets/images/cauldron.png')}
                     style={{ width: 60, height: 60, marginBottom: 5 }}
                 />
-                <Text style={styles.title}>Feitiços moving</Text>
+                <Text style={styles.title}>aaaaa</Text>
 
                 <Card style={styles.card}>
                     <Card.Content>
