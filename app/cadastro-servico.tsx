@@ -42,7 +42,7 @@ export default function CadastroServico() {
       });
 
       Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!')
-      router.replace('/dashboard');
+      router.replace('/dashboardMudanceiro');
       setTipoServico('');
       setDescricao('');
       setCep('');
@@ -77,6 +77,7 @@ export default function CadastroServico() {
       <TextInput
         style={[styles.input, { height: 80 }]}
         placeholder="Área de serviço, disponibilidade, informações adicionais..."
+        placeholderTextColor="#bfbfbf"
         value={descricao}
         onChangeText={setDescricao}
         multiline
@@ -86,6 +87,7 @@ export default function CadastroServico() {
       <TextInput
         style={styles.input}
         placeholder="Ex: 85560000"
+        placeholderTextColor="#bfbfbf"
         keyboardType="numeric"
         maxLength={8} 
         value={cep}
@@ -99,6 +101,7 @@ export default function CadastroServico() {
       <TextInput
         style={styles.input}
         placeholder="Caminhão Pequeno"
+        placeholderTextColor="#bfbfbf"
         value={veiculo}
         onChangeText={setVeiculo}
       />
@@ -110,6 +113,7 @@ export default function CadastroServico() {
         <TextInput
           style={[styles.input, { paddingLeft: 30 }]}
           placeholder="250,00"
+          placeholderTextColor="#bfbfbf"
           keyboardType="numeric"
           value={preco}
           onChangeText={(text) => {
@@ -126,6 +130,7 @@ export default function CadastroServico() {
       <TextInput
         style={styles.input}
         placeholder="Ex: joao@gmail.com, 57 992143984"
+        placeholderTextColor="#bfbfbf"
         value={contato}
         onChangeText={setContato}
       />
@@ -162,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#bfbfbf',
+    color: '#000',
   },
   pickerContainer: {
     borderWidth: 1,
@@ -189,7 +194,7 @@ const styles = StyleSheet.create({
   left: 10,
   top: '50%',
   transform: [{ translateY: -10 }],
-  color: '#bfbfbf',
+  color: '#8e8f91',
   fontSize: 16,
   fontWeight: '600',
   zIndex: 1,
