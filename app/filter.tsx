@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function FiltrosScreen() {
   const router = useRouter();
+  const { cep } = useLocalSearchParams();
   const [localizacao, setLocalizacao] = useState('');
   type mudancasType = {
     residencial:boolean;
@@ -20,6 +21,15 @@ export default function FiltrosScreen() {
     fretes: false,
     montagem: false,
   });
+  const limparFiltros = () => {
+    setMudancas({
+      residencial: false,
+      comercial: false,
+      fretes: false,
+      montagem: false,
+    });
+    setAvaliacao(0);
+  };
 
   const opcoesMudanca: [keyof mudancasType, string][] = [
         ['residencial', 'Mudança Residencial'],
@@ -37,15 +47,6 @@ export default function FiltrosScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Filtros</Text>
-
-      <Text style={styles.label}>Localização</Text>
-      <TextInput
-        placeholder="Digite a Cidade ou Bairro"
-        value={localizacao}
-        onChangeText={setLocalizacao}
-        style={styles.input}
-        placeholderTextColor="#999"
-      />
 
       <Text style={styles.label}>Tipo de Mudança</Text>
       
@@ -80,18 +81,15 @@ export default function FiltrosScreen() {
 
       <TouchableOpacity 
         style={styles.applyButton} 
-        onPress={() => router.push({pathname: '/agendamento', params:{localizacao, 
+        onPress={() => router.push({pathname: '/mudanceiros', params:{cep:cep, 
                                                                       residencial:String(mudancas.residencial), 
                                                                       comercial:String(mudancas.comercial),
                                                                       fretes:String(mudancas.fretes),
-                                                                      montagem:String(mudancas.montagem),
-                                                                      avaliacao: String(avaliacao)
-                                                                    }
-          })}>
+                                                                      montagem:String(mudancas.montagem),}})}>
         <Text style={styles.buttonText}>Aplicar Filtros</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.clearButton}>
+      <TouchableOpacity style={styles.clearButton} onPress={limparFiltros}>
         <Text style={[styles.buttonText, { color: '#000' }]}>Limpar Filtros</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -142,7 +140,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 20,
     alignItems: 'center',
-    marginTop: 140,
+    marginTop: 80,
   },
   clearButton: {
     borderWidth: 1,

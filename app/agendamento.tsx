@@ -156,12 +156,7 @@ useEffect(() => {
                         </View>
 
                         <View style={styles.menuContainer}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.pickerLabel}>Escolha um mudanceiro</Text>
-                                <TouchableOpacity style={styles.filterIcon} onPress={() => router.push('/filter')}>
-                                    <MaterialCommunityIcons name="filter-variant" size={18} color="#fff" />
-                                </TouchableOpacity>
-                            </View>
+                            
 
                             <Button
                                 mode="outlined"

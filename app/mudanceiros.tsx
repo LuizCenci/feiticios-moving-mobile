@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../src/config/firebaseconfig';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Hotbar from './components/hotbar';
+import FiltroBotao from './components/filtroBotao';
 interface Mudanceiro {
   userID: string;
   nome: string;
@@ -16,7 +18,13 @@ interface Mudanceiro {
 export default function Mudanceiros() {
 
   const router = useRouter();
-  const { cep } = useLocalSearchParams();
+  const { cep, residencial, comercial, fretes, montagem } = useLocalSearchParams();
+  const servicosSelecionados = [];
+  if (residencial === 'true') servicosSelecionados.push('Mudança Residencial');
+  if (comercial === 'true') servicosSelecionados.push('Mudança Comercial');
+  if (fretes === 'true') servicosSelecionados.push('Pequenos Fretes');
+  if (montagem === 'true') servicosSelecionados.push('Montagem/Desmontagem');
+
   const [mudanceiros, setMudanceiros] = useState<Mudanceiro[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,8 +51,10 @@ export default function Mudanceiros() {
         tipo: data.tipoServico,
         preco: data.preco ?? 'Preço não especificado'
       };
+      
     });
-
+    const tiposServico = servicosList.map(servico => servico.tipo);
+    
     const mudanceiroCompleto: Mudanceiro = {
       userID,
       nome: mudanceiroData.nome,
@@ -53,23 +63,36 @@ export default function Mudanceiros() {
       servicos: servicosList.length > 0 ? servicosList : [{ tipo: 'Serviço não especificado', preco: 'Preço não especificado' }],
       cep: cepList,
     };
-
+    
     return mudanceiroCompleto;
   }
 
-  async function getTodosMudanceirosCompletos(): Promise<Mudanceiro[]> {
+  async function getTodosMudanceirosCompletos(servicosSelecionados: string[]): Promise<Mudanceiro[]> {
     const mudanceirosSnapshot = await getDocs(collection(db, "usuarios"));
     const mudanceirosData = mudanceirosSnapshot.docs;
+
     const mudanceirosFiltrados = mudanceirosData.filter(doc => doc.data().tipoUsuario === "mudanceiro");
 
     const promises = mudanceirosFiltrados.map(doc => getMudanceiroCompleto(doc.id));
     const completos = await Promise.all(promises);
 
-    return completos.filter(Boolean) as Mudanceiro[];
+    // Se não houver filtros selecionados, retorna todos (filtra apenas nulos)
+    if (servicosSelecionados.length === 0) {
+        return completos.filter(Boolean) as Mudanceiro[];
+    }
+
+    // Se houver filtros selecionados, aplica o filtro
+    const mudanceirosFiltradosPorServico = completos.filter(mudanceiro =>
+        mudanceiro && mudanceiro.servicos.some(servico =>
+            servicosSelecionados.includes(servico.tipo)
+        )
+    );
+
+    return mudanceirosFiltradosPorServico;
   }
 
   useEffect(() => {
-    getTodosMudanceirosCompletos()
+    getTodosMudanceirosCompletos(servicosSelecionados)
       .then((data) => setMudanceiros(data))
       .finally(() => setLoading(false));
   }, []);
@@ -83,8 +106,10 @@ export default function Mudanceiros() {
   }
 
   return (
-    <View style={{flex:1}}>
+    <View style={{flex:1, backgroundColor:'#FEF7FF'}}>
+      <FiltroBotao onPress={() => router.push({ pathname: '/filter', params: { cep } })}></FiltroBotao>
       <ScrollView contentContainerStyle={styles.container}>
+        
         <FlatList
           data={mudanceiros}
           keyExtractor={(item) => item.userID}
@@ -186,6 +211,23 @@ const styles = StyleSheet.create({
   flexDirection: 'row',
   alignItems: 'center', // para alinhar verticalmente no centro
   },
+  filterIcon: {
+    width: '100%', // ocupa toda a largura disponível da tela
+    alignItems: 'center', // centraliza o conteúdo dentro do botão
+    backgroundColor: '#9b59b6',
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'center', // centraliza texto e ícone na horizontal
+    marginRight: 0, // removendo margem desnecessária
+  },
+
+  labelRow: {
+    width: '100%', // a linha também precisa ocupar 100% para o botão se expandir
+    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent:'flex-end',
+  },
+
 
 });
   
