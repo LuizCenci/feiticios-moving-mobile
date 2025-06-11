@@ -9,6 +9,7 @@ import { auth, db } from '../src/config/firebaseconfig';
 export default function Cadastro() {
   const router = useRouter();
 
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [tipoUsuario, setTipoUsuario] = useState<'cliente' | 'mudanceiro' | null>(null);
@@ -35,7 +36,7 @@ export default function Cadastro() {
 
   const handleCadastro = async () => {
     setErro('');
-    if (!email || !senha || !tipoUsuario) {
+    if (!email || !senha || !tipoUsuario || !nome || !cpf || !dataNascimento) {
       setErro('Preencha todos os campos e selecione o tipo de usuário.');
       return;
     }
@@ -44,13 +45,14 @@ export default function Cadastro() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
       const user = userCredential.user;
 
-      // salva o tipo de usuário no Firestore
       await setDoc(doc(db, 'usuarios', user.uid), {
         email,
         tipoUsuario,
+        nome,
+        cpf,
+        dataNascimento,
       });
 
-      // redireciona com base no tipo
       if (tipoUsuario === 'cliente') {
         router.replace('/dashboard');
       } else {
@@ -71,7 +73,12 @@ export default function Cadastro() {
         <View style={{ width: '100%', marginBottom: 20 }}>
           <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Nome completo:</Text>
           <View style={{ backgroundColor: '#dcdcdc', borderRadius: 10, paddingHorizontal: 10 }}>
-            <TextInput placeholder="Digite seu nome completo" style={{ flex: 1, paddingVertical: 12 }} />
+            <TextInput
+              placeholder="Digite seu nome completo"
+              value={nome}
+              onChangeText={setNome}
+              style={{ flex: 1, paddingVertical: 12 }}
+            />
           </View>
         </View>
 

@@ -10,9 +10,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { db } from '../src/config/firebaseconfig';
-//adadadada
+import { database } from '../src/config/firebaseconfig';
+
 export default function CadastroServico() {
   const [tipoServico, setTipoServico] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
@@ -28,6 +27,14 @@ export default function CadastroServico() {
       return;
     }
 
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+    Alert.alert('Erro', 'Usuário não autenticado!');
+    return;
+  }
+
     try {
       const servicosRef = collection(db, 'servicos');
       await addDoc(servicosRef, {
@@ -37,13 +44,11 @@ export default function CadastroServico() {
         veiculo,
         preco,
         contato,
-        criadoEm: new Date(),
+        criadoEm: new Date().toISOString(),
       });
 
-      Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!');
+      Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!')
       router.replace('/dashboard');
-
-      // Limpar campos
       setTipoServico('');
       setDescricao('');
       setCep('');
@@ -78,6 +83,7 @@ export default function CadastroServico() {
       <TextInput
         style={[styles.input, { height: 80 }]}
         placeholder="Área de serviço, disponibilidade, informações adicionais..."
+        placeholderTextColor="#bfbfbf"
         value={descricao}
         onChangeText={setDescricao}
         multiline
@@ -87,32 +93,50 @@ export default function CadastroServico() {
       <TextInput
         style={styles.input}
         placeholder="Ex: 85560000"
+        placeholderTextColor="#bfbfbf"
         keyboardType="numeric"
+        maxLength={8} 
         value={cep}
-        onChangeText={setCep}
+        onChangeText={(text) => {
+        const sanitized = text.replace(/[^0-9]/g, '');
+        setCep(sanitized);
+        }}
       />
 
       <Text style={styles.label}>Tipo de veículo</Text>
       <TextInput
         style={styles.input}
         placeholder="Caminhão Pequeno"
+        placeholderTextColor="#bfbfbf"
         value={veiculo}
         onChangeText={setVeiculo}
       />
 
+      <View style={{ marginTop: 16 }}>
       <Text style={styles.label}>Preço base</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="R$ 250,00"
-        keyboardType="numeric"
-        value={preco}
-        onChangeText={setPreco}
-      />
+      <View style={{ position: 'relative', width: '100%' }}>
+        <Text style={styles.currency}>R$</Text>
+        <TextInput
+          style={[styles.input, { paddingLeft: 30 }]}
+          placeholder="250,00"
+          placeholderTextColor="#bfbfbf"
+          keyboardType="numeric"
+          value={preco}
+          onChangeText={(text) => {
+          const sanitized = text.replace(/[^0-9.,]/g, '');
+          setPreco(sanitized);
+          }}
+          maxLength={10}
+        />
+      </View>
+      </View>
+
 
       <Text style={styles.label}>Meio de contato</Text>
       <TextInput
         style={styles.input}
         placeholder="Ex: joao@gmail.com, 57 992143984"
+        placeholderTextColor="#bfbfbf"
         value={contato}
         onChangeText={setContato}
       />
@@ -149,7 +173,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#bfbfbf',
+    color: '#000',
   },
   pickerContainer: {
     borderWidth: 1,
@@ -171,4 +195,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+  currency: {
+  position: 'absolute',
+  left: 10,
+  top: '50%',
+  transform: [{ translateY: -10 }],
+  color: '#8e8f91',
+  fontSize: 16,
+  fontWeight: '600',
+  zIndex: 1,
+},
+
 });
