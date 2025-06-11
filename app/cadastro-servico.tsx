@@ -1,4 +1,6 @@
+import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 import { addDoc, collection } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
@@ -10,9 +12,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { db } from '../src/config/firebaseconfig';
-//adadadada
+
+
 export default function CadastroServico() {
   const [tipoServico, setTipoServico] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
@@ -46,10 +48,11 @@ export default function CadastroServico() {
         preco,
         contato,
         criadoEm: new Date(),
+        mudanceiroId: user.uid,
       });
 
       Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!');
-      router.replace('/dashboard');
+      router.replace('/dashboardMudanceiro');
 
       // Limpar campos
       setTipoServico('');
