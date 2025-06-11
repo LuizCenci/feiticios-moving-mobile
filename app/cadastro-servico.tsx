@@ -1,6 +1,5 @@
-import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
-import { push, ref } from 'firebase/database';
+import { addDoc, collection } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -11,17 +10,17 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { database } from '../src/config/firebaseconfig';
+import { Picker } from '@react-native-picker/picker';
+import { db } from '../src/config/firebaseconfig';
 
 export default function CadastroServico() {
-  const [tipoServico, setTipoServico] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [cep, setCep] = useState('');
-  const [veiculo, setVeiculo] = useState('');
-  const [preco, setPreco] = useState('');
-  const [contato, setContato] = useState('');
+  const [tipoServico, setTipoServico] = useState<string>('');
+  const [descricao, setDescricao] = useState<string>('');
+  const [cep, setCep] = useState<string>('');
+  const [veiculo, setVeiculo] = useState<string>('');
+  const [preco, setPreco] = useState<string>('');
+  const [contato, setContato] = useState<string>('');
   const router = useRouter();
-
 
   const handleCadastro = async () => {
     if (!tipoServico || !descricao || !cep || !veiculo || !preco || !contato) {
@@ -30,19 +29,21 @@ export default function CadastroServico() {
     }
 
     try {
-      const servicosRef = ref(database, 'servicos');
-      await push(servicosRef, {
+      const servicosRef = collection(db, 'servicos');
+      await addDoc(servicosRef, {
         tipoServico,
         descricao,
         cep,
         veiculo,
         preco,
         contato,
-        criadoEm: new Date().toISOString(),
+        criadoEm: new Date(),
       });
 
-      Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!')
+      Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!');
       router.replace('/dashboard');
+
+      // Limpar campos
       setTipoServico('');
       setDescricao('');
       setCep('');

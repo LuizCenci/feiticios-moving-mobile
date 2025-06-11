@@ -1,65 +1,47 @@
 import React, { useState, useRef, useEffect } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-//import Icon from 'react-native-vector-icons/Feather';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ref, get, child } from 'firebase/database';
-import { database } from '../src/config/firebaseconfig';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { firestore } from '../src/config/firebaseconfig';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import {
-    Button,
-    Card,
-    Menu,
-    Provider as PaperProvider,
-    TextInput,
-} from 'react-native-paper';
-import { Router } from 'lucide-react-native';
+import { Button, Card, Menu, Provider as PaperProvider, TextInput } from 'react-native-paper';
 
 export default function Agendamento() {
     const router = useRouter();
-    const params = useLocalSearchParams();
     const { localizacao, avaliacao, residencial, comercial, fretes, montagem } = useLocalSearchParams();
-    const [resultados, setResultados] = useState([]);
+
+    const [resultados, setResultados] = useState<any[]>([]);
     const [mudanceiros, setMudanceiros] = useState<string[]>([]);
 
     const buscarMudanceiros = async () => {
-    try {
-        const dbRef = ref(database);
-        const snapshot = await get(child(dbRef, 'mudanceiro'));
+        try {
+            const querySnapshot = await getDocs(collection(firestore, 'mudanceiro'));
+            const mudanceirosArray: any[] = [];
+            querySnapshot.forEach((doc) => {
+                mudanceirosArray.push({ id: doc.id, ...doc.data() });
+            });
 
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            const mudanceirosArray = Object.values(data) as any[];
-            console.log(mudanceirosArray);
-            setResultados(mudanceirosArray); // salva os dados completos
-            setMudanceiros(mudanceirosArray.map((m) => m.nome)); // exibe só os nomes no menu
-
-        } else {
-            console.warn('Nenhum mudanceiro encontrado.');
+            setResultados(mudanceirosArray);
+            setMudanceiros(mudanceirosArray.map((m) => m.nome));
+        } catch (error) {
+            console.error('Erro ao buscar mudanceiros:', error);
             setResultados([]);
             setMudanceiros([]);
         }
-    } catch (error) {
-        console.error('Erro ao buscar mudanceiros:', error);
-        setResultados([]);
-        setMudanceiros([]);
-    }
     };
+
     const filtrarMudanceiros = () => {
         let filtrados = resultados;
 
-        // Filtro por localização (caso informada)
         if (localizacao) {
             filtrados = filtrados.filter((m) => m.localizacao?.toLowerCase() === localizacao.toLowerCase());
         }
 
-        // Filtro por avaliação mínima (ex: 4.5)
         if (avaliacao) {
             const minAvaliacao = parseFloat(avaliacao as string);
             filtrados = filtrados.filter((m) => parseFloat(m.avaliacao) >= minAvaliacao);
         }
 
-        // Filtros por tipo de mudança (serviços oferecidos)
         const filtrosServicos = {
             residencial: residencial === 'true',
             comercial: comercial === 'true',
@@ -67,30 +49,26 @@ export default function Agendamento() {
             montagem: montagem === 'true',
         };
 
-        // Aplica apenas os filtros que foram ativados
         Object.entries(filtrosServicos).forEach(([tipo, ativo]) => {
             if (ativo) {
-            filtrados = filtrados.filter((m) => m.servicos?.[tipo]);
+                filtrados = filtrados.filter((m) => m.servicos?.[tipo]);
             }
         });
 
-        // Atualiza os nomes exibidos no menu
         const nomesFiltrados = filtrados.map((m) => m.nome);
         setMudanceiros(nomesFiltrados);
     };
 
-
-    useEffect(() =>{
+    useEffect(() => {
         buscarMudanceiros();
     }, []);
 
-    useEffect(() =>{
+    useEffect(() => {
         if (resultados.length > 0) {
             filtrarMudanceiros();
         }
     }, [resultados, localizacao, avaliacao, residencial, comercial, fretes, montagem]);
 
-    
     const [origem, setOrigem] = useState('');
     const [destino, setDestino] = useState('');
     const [itens, setItens] = useState('');
@@ -119,7 +97,7 @@ export default function Agendamento() {
                     source={require('../assets/images/cauldron.png')}
                     style={{ width: 60, height: 60, marginBottom: 5 }}
                 />
-                <Text style={styles.title}>Feitiços moving</Text>
+                <Text style={styles.title}>Feitiços Moving</Text>
 
                 <Card style={styles.card}>
                     <Card.Content>
@@ -179,7 +157,6 @@ export default function Agendamento() {
                                 </TouchableOpacity>
                             </View>
 
-                            
                             <Button
                                 mode="outlined"
                                 onPress={openMenu}
@@ -190,27 +167,26 @@ export default function Agendamento() {
                             >
                                 {mudanceiro || 'Selecione...'}
                             </Button>
-                            
 
                             <Menu
                                 visible={menuVisible}
                                 onDismiss={() => setMenuVisible(false)}
                                 anchor={anchor}
                                 style={styles.dropdownMenu}
-                                >
+                            >
                                 {mudanceiros.length === 0 ? (
                                     <Menu.Item title="Nenhum disponível" disabled />
                                 ) : (
                                     mudanceiros.map((option, index) => (
-                                    <Menu.Item
-                                        key={index}
-                                        onPress={() => {
-                                        setMudanceiro(option);
-                                        setMenuVisible(false);
-                                        }}
-                                        title={option}
-                                        titleStyle={{ color: '#000' }}
-                                    />
+                                        <Menu.Item
+                                            key={index}
+                                            onPress={() => {
+                                                setMudanceiro(option);
+                                                setMenuVisible(false);
+                                            }}
+                                            title={option}
+                                            titleStyle={{ color: '#000' }}
+                                        />
                                     ))
                                 )}
                             </Menu>
@@ -300,31 +276,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#d946ef',
         marginTop: 8,
     },
-    botao_filter: {
-        backgroundColor: '#1c81e7',
-        padding: 10,
-        borderRadius: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 40,
-        height: 40,
-    },
     labelRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 8,
     },
-
     filterIcon: {
-        backgroundColor: '#9b59b6', // roxo discreto
+        backgroundColor: '#9b59b6',
         borderRadius: 16,
         padding: 6,
         marginLeft: 10,
-    },
-
-    filterText: {
-        color: '#fff',
-        fontSize: 16,
     },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View, Button } from 'react-native';
 import {useRouter} from 'expo-router'
-
+import { NavigationContainer } from '@react-navigation/native';
 export default function index(){
     const router = useRouter();
     return(

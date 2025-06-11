@@ -1,11 +1,10 @@
-
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { push, ref } from 'firebase/database';
-import { auth, database } from '../src/config/firebaseconfig';
+import { collection, addDoc } from 'firebase/firestore';
+import { auth, db } from '../src/config/firebaseconfig';
 
 const Avaliacao = () => {
   const router = useRouter();
@@ -60,15 +59,17 @@ const Avaliacao = () => {
       return;
     }
 
-    const avaliacaoRef = ref(database, `avaliacoes/${user.uid}`);
     const novaAvaliacao = {
       ...avaliacoes,
       feedback,
+      userId: user.uid,
       data: new Date().toISOString()
     };
 
     try {
-      await push(avaliacaoRef, novaAvaliacao);
+      const avaliacaoRef = collection(db, 'avaliacoes');
+      await addDoc(avaliacaoRef, novaAvaliacao);
+
       Alert.alert('Sucesso', 'Avaliação enviada com sucesso!');
       setAvaliacoes({ tempo: 0, itens: 0, atendimento: 0 });
       setFeedback('');
