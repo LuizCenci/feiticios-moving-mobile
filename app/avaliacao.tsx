@@ -3,8 +3,10 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { push, ref } from 'firebase/database';
-import { auth, database } from '../src/config/firebaseconfig';
+import { addDoc, collection, getFirestore, Timestamp } from 'firebase/firestore';
+import { app, auth } from '../src/config/firebaseconfig';
+
+const db = getFirestore(app);
 
 const Avaliacao = () => {
   const router = useRouter();
@@ -39,15 +41,15 @@ const Avaliacao = () => {
       return;
     }
 
-    const avaliacaoRef = ref(database, `avaliacoes/${user.uid}`);
     const novaAvaliacao = {
       ...avaliacoes,
       feedback,
-      data: new Date().toISOString()
+      data: Timestamp.now(),
+      usuarioId: user.uid
     };
 
     try {
-      await push(avaliacaoRef, novaAvaliacao);
+      await addDoc(collection(db, 'avaliacoes'), novaAvaliacao);
       Alert.alert('Sucesso', 'Avaliação enviada com sucesso!');
       setAvaliacoes({ tempo: 0, itens: 0, atendimento: 0 });
       setFeedback('');
