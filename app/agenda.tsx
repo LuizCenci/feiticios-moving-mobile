@@ -1,6 +1,7 @@
 import { CalendarDays } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import HotbarMudanceiro from './components/hotbarMudanceiro';
 
 const servicosAgendados = [
   {
@@ -21,25 +22,28 @@ const servicosAgendados = [
 
 const Agenda = () => {
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.titulo}>Agenda de Serviços</Text>
+    <View style={{flex:1}}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.titulo}>Agenda de Serviços</Text>
 
-      {servicosAgendados.map((servico) => (
-        <View key={servico.id} style={styles.card}>
-          <View style={styles.row}>
-            <CalendarDays color="#6C47A3" size={20} />
-            <Text style={styles.data}>{servico.data}</Text>
+        {servicosAgendados.map((servico) => (
+          <View key={servico.id} style={styles.card}>
+            <View style={styles.row}>
+              <CalendarDays color="#6C47A3" size={20} />
+              <Text style={styles.data}>{servico.data}</Text>
+            </View>
+            <Text style={styles.texto}><Text style={styles.label}>Cliente:</Text> {servico.cliente}</Text>
+            <Text style={styles.texto}><Text style={styles.label}>Endereço:</Text> {servico.endereco}</Text>
+            <Text style={styles.texto}><Text style={styles.label}>Horário:</Text> {servico.horario}</Text>
           </View>
-          <Text style={styles.texto}><Text style={styles.label}>Cliente:</Text> {servico.cliente}</Text>
-          <Text style={styles.texto}><Text style={styles.label}>Endereço:</Text> {servico.endereco}</Text>
-          <Text style={styles.texto}><Text style={styles.label}>Horário:</Text> {servico.horario}</Text>
-        </View>
-      ))}
+        ))}
 
-      <TouchableOpacity style={styles.botao}>
-        <Text style={styles.botaoTexto}>Ver calendário completo</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity style={styles.botao}>
+          <Text style={styles.botaoTexto}>Ver calendário completo</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      <HotbarMudanceiro></HotbarMudanceiro>
+    </View>
   );
 };
 

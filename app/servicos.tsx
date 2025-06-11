@@ -1,8 +1,9 @@
 import { getAuth } from 'firebase/auth';
 import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../src/config/firebaseconfig';
+import HotbarMudanceiro from './components/hotbarMudanceiro';
 
 export default function ServicosDoMudanceiro() {
     type Servico = {
@@ -57,27 +58,30 @@ export default function ServicosDoMudanceiro() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Meus Serviços</Text>
+    <View style={{flex:1}}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Meus Serviços</Text>
 
-      {servicos.length === 0 ? (
-        <Text style={styles.msg}>Nenhum serviço encontrado.</Text>
-      ) : (
-        <FlatList
-          data={servicos}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.info}><Text style={styles.label}>Tipo:</Text> {item.tipoServico}</Text>
-              <Text style={styles.info}><Text style={styles.label}>CEP:</Text> {item.cep}</Text>
-              <Text style={styles.info}><Text style={styles.label}>Preço:</Text> R$ {item.preco}</Text>
-              <TouchableOpacity style={styles.btnDelete} onPress={() => deletarServico(item.id)}>
-                <Text style={styles.btnDeleteText}>Excluir</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
-      )}
+        {servicos.length === 0 ? (
+          <Text style={styles.msg}>Nenhum serviço encontrado.</Text>
+        ) : (
+          <FlatList
+            data={servicos}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.info}><Text style={styles.label}>Tipo:</Text> {item.tipoServico}</Text>
+                <Text style={styles.info}><Text style={styles.label}>CEP:</Text> {item.cep}</Text>
+                <Text style={styles.info}><Text style={styles.label}>Preço:</Text> R$ {item.preco}</Text>
+                <TouchableOpacity style={styles.btnDelete} onPress={() => deletarServico(item.id)}>
+                  <Text style={styles.btnDeleteText}>Excluir</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+        )}
+      </ScrollView>
+      <HotbarMudanceiro></HotbarMudanceiro>
     </View>
   );
 }

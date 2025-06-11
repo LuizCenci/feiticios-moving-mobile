@@ -1,56 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../src/config/firebaseconfig';
-
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import Hotbar from './components/hotbar';
 interface Mudanceiro {
   userID: string;
   nome: string;
-}
-interface Avaliacao {
-  userID: string; // referência para o Mudanceiro
-  avaliacao: number;
-}
-
-interface Servicos {
-  userID: string; // referência para o Mudanceiro
-  residencial?: boolean;
-  comercial?: boolean;
-  fretes?: boolean;
-  montagem?: boolean;
+  tipoUsuario: string;
+  avaliacao?: number;
+  servicos?: { tipo: string; preco: string }[];
+  cep: string;
 }
 
 export default function Mudanceiros() {
+
+  const router = useRouter();
+  const { cep } = useLocalSearchParams();
   const [mudanceiros, setMudanceiros] = useState<Mudanceiro[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function getMudanceiroCompleto(userID: string): Promise<Mudanceiro | null> {
     const mudanceiroDoc = await getDoc(doc(db, "usuarios", userID));
     if (!mudanceiroDoc.exists()) return null;
+
     const mudanceiroData = mudanceiroDoc.data();
+    if (mudanceiroData.tipoUsuario !== "mudanceiro") return null;
 
     const avalCollection = collection(db, "avaliacoes");
-    const avalQuery = query(avalCollection, where("mudanceiroId", "==", userID));
+    const avalQuery = query(avalCollection, where("userID", "==", userID));
     const avalSnapshot = await getDocs(avalQuery);
     const avalData = avalSnapshot.docs[0]?.data();
 
     const servCollection = collection(db, "servicos");
     const servQuery = query(servCollection, where("mudanceiroId", "==", userID));
     const servSnapshot = await getDocs(servQuery);
-    const servData = servSnapshot.docs[0]?.data();
+    const cepList = servSnapshot.docs[0]?.data()?.cep;
+    if(cepList !== cep ) return null;
+    const servicosList = servSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        tipo: data.tipoServico,
+        preco: data.preco ?? 'Preço não especificado'
+      };
+    });
 
     const mudanceiroCompleto: Mudanceiro = {
       userID,
       nome: mudanceiroData.nome,
-      avaliacao: avalData?.avaliacao,
-      servicos: servData
-        ? {
-            residencial: servData.residencial,
-            comercial: servData.comercial,
-            fretes: servData.fretes,
-            montagem: servData.montagem,
-          }
-        : undefined,
+      tipoUsuario: mudanceiroData.tipoUsuario,
+      avaliacao: avalData?.avaliacao ?? 0,
+      servicos: servicosList.length > 0 ? servicosList : [{ tipo: 'Serviço não especificado', preco: 'Preço não especificado' }],
+      cep: cepList,
     };
 
     return mudanceiroCompleto;
@@ -59,8 +60,9 @@ export default function Mudanceiros() {
   async function getTodosMudanceirosCompletos(): Promise<Mudanceiro[]> {
     const mudanceirosSnapshot = await getDocs(collection(db, "usuarios"));
     const mudanceirosData = mudanceirosSnapshot.docs;
+    const mudanceirosFiltrados = mudanceirosData.filter(doc => doc.data().tipoUsuario === "mudanceiro");
 
-    const promises = mudanceirosData.map((doc) => getMudanceiroCompleto(doc.id));
+    const promises = mudanceirosFiltrados.map(doc => getMudanceiroCompleto(doc.id));
     const completos = await Promise.all(promises);
 
     return completos.filter(Boolean) as Mudanceiro[];
@@ -81,57 +83,109 @@ export default function Mudanceiros() {
   }
 
   return (
-    <FlatList
-      data={mudanceiros}
-      keyExtractor={(item) => item.userID}
-      contentContainerStyle={styles.listContainer}
-      renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Text style={styles.nome}>{item.nome}</Text>
-          <Text>Avaliação: {item.avaliacao ?? "Sem avaliação"}</Text>
-          <Text>Serviços:</Text>
-          <View style={styles.servicosList}>
-            {item.servicos?.residencial && <Text style={styles.servicoItem}>• Residencial</Text>}
-            {item.servicos?.comercial && <Text style={styles.servicoItem}>• Comercial</Text>}
-            {item.servicos?.fretes && <Text style={styles.servicoItem}>• Fretes</Text>}
-            {item.servicos?.montagem && <Text style={styles.servicoItem}>• Montagem</Text>}
-            {!item.servicos && <Text style={styles.servicoItem}>Nenhum serviço listado</Text>}
-          </View>
-        </View>
-      )}
-    />
+    <View style={{flex:1}}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <FlatList
+          data={mudanceiros}
+          keyExtractor={(item) => item.userID}
+          
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.company}>{item.nome}</Text>
+                <Text style={[styles.company, { marginLeft: 10 }]}>CEP: {item.cep}</Text>
+              </View>
+
+              <Text style={styles.stars}>⭐ {item.avaliacao ?? "Sem avaliação"}</Text>
+
+              <View style={styles.tagsContainer}>
+                {item.servicos?.map((servico, index) => (
+                  <View key={index} style={styles.tag}>
+                    <Text>{servico.tipo} - R$ {servico.preco}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push({ pathname: '/agendamento', params: { mudanceiroId: item.userID } })}
+              >
+                <Text style={styles.buttonText}>Selecionar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        /> 
+      </ScrollView>
+      <Hotbar></Hotbar>
+    </View>
+    
+
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#FEF7FF',
+    padding: 20,
+    paddingBottom: 50,
+    flexGrow: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  listContainer: {
-    padding: 16,
-  },
   card: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
+    borderRadius: 20,
     padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    elevation: 2,
+    
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
-  nome: {
+  company: {
     fontWeight: 'bold',
     fontSize: 18,
+  },
+  stars: {
+    fontSize: 16,
+    marginTop: 4,
     marginBottom: 8,
   },
-  servicosList: {
-    marginTop: 4,
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    
   },
-  servicoItem: {
-    marginLeft: 8,
-    fontSize: 14,
+  tag: {
+    backgroundColor: '#fff',
+    borderColor: '#6C47A3',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
+  button: {
+    backgroundColor: '#BF5AF2',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  row: {
+  flexDirection: 'row',
+  alignItems: 'center', // para alinhar verticalmente no centro
+  },
+
 });
-
-
-
+  

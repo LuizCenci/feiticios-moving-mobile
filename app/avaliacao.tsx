@@ -1,8 +1,8 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Hotbar from './components/hotbar';
 import { collection, addDoc } from 'firebase/firestore';
 import { auth, db } from '../src/config/firebaseconfig';
 
@@ -81,31 +81,37 @@ const Avaliacao = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Avalie sua experiência:</Text>
+    
+      <View style={{flex:1}}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Avalie sua experiência:</Text>
 
-      <Text style={styles.label}>Tempo de entrega:</Text>
-      {renderStars('tempo')}
+          <Text style={styles.label}>Tempo de entrega:</Text>
+          {renderStars('tempo')}
 
-      <Text style={styles.label}>Condição dos itens:</Text>
-      {renderStars('itens')}
+          <Text style={styles.label}>Condição dos itens:</Text>
+          {renderStars('itens')}
 
-      <Text style={styles.label}>Atendimento:</Text>
-      {renderStars('atendimento')}
+          <Text style={styles.label}>Atendimento:</Text>
+          {renderStars('atendimento')}
 
-      <Text style={styles.label}>Feedback:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Escreva aqui..."
-        value={feedback}
-        onChangeText={setFeedback}
-        multiline
-      />
+          <Text style={styles.label}>Feedback:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Escreva aqui..."
+            value={feedback}
+            onChangeText={setFeedback}
+            multiline
+          />
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Enviar Avaliação</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Enviar Avaliação</Text>
+          </TouchableOpacity>
+        </ScrollView>
+        <Hotbar></Hotbar>
+      </View>
+    
+    
   );
 };
 

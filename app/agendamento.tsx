@@ -5,7 +5,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../src/config/firebaseconfig';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Button, Card, Menu, Provider as PaperProvider, TextInput } from 'react-native-paper';
-
+import Hotbar from './components/hotbar';
 export default function Agendamento() {
     const router = useRouter();
     const { localizacao, avaliacao, residencial, comercial, fretes, montagem } = useLocalSearchParams();
@@ -210,7 +210,9 @@ useEffect(() => {
                         </Button>
                     </Card.Content>
                 </Card>
+                
             </ScrollView>
+            <Hotbar></Hotbar>   
         </PaperProvider>
     );
 }

@@ -2,13 +2,15 @@
 import { useRouter } from 'expo-router';
 import { Calendar, ClipboardList, AlignJustify  } from 'lucide-react-native';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
+import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import Hotbar from './components/hotbar';
+import HotbarMudanceiro from './components/hotbarMudanceiro';
 export default function DashboardMudanceiro() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <View style={{flex:1}}>
+      <ScrollView contentContainerStyle={styles.container}>
       <Image source={require('../assets/images/cauldron.png')} style={styles.logo} />
       <Text style={styles.title}>Olá, Mudanceiro!</Text>
       <Text style={styles.subtitle}>O que deseja fazer?</Text>
@@ -35,6 +37,9 @@ export default function DashboardMudanceiro() {
         <Calendar size={24} color="#fff" style={{ marginRight: 10 }} />
         <Text style={styles.buttonText}>Ver minha agenda</Text>
       </TouchableOpacity>
+      
+      </ScrollView>
+      <HotbarMudanceiro></HotbarMudanceiro>
     </View>
   );
 }

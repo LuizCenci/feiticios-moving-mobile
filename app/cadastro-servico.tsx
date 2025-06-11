@@ -13,7 +13,8 @@ import {
   View
 } from 'react-native';
 import { db } from '../src/config/firebaseconfig';
-
+import Hotbar from './components/hotbar';
+import HotbarMudanceiro from './components/hotbarMudanceiro';
 
 export default function CadastroServico() {
   const [tipoServico, setTipoServico] = useState<string>('');
@@ -150,6 +151,7 @@ export default function CadastroServico() {
       <TouchableOpacity style={styles.button} onPress={handleCadastro}>
         <Text style={styles.buttonText}>Cadastrar serviço</Text>
       </TouchableOpacity>
+      <HotbarMudanceiro></HotbarMudanceiro>
     </ScrollView>
   );
 }

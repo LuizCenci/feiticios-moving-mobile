@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import React, { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Hotbar from './components/hotbar';
 
 export default function Mudanceiros() {
   const [cep, setCep] = useState('');
@@ -56,22 +57,8 @@ export default function Mudanceiros() {
       </View>
     </ScrollView>
 
-    <View style={styles.navbar}>
-  <TouchableOpacity style={styles.navItem} onPress={() => router.push('/agendamento')}>
-    <Ionicons name="list" size={24} color="black" />
-    <Text>Agendar</Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
-    <Ionicons name="home" size={24} color="black" />
-    <Text>Home</Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/login')}>
-    <Ionicons name="log-out-outline" size={24} color="black" />
-    <Text>Sair</Text>
-  </TouchableOpacity>
-</View>
+    <Hotbar></Hotbar>
+    
 
 
   </View>
