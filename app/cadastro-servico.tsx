@@ -87,8 +87,12 @@ export default function CadastroServico() {
         style={styles.input}
         placeholder="Ex: 85560000"
         keyboardType="numeric"
+        maxLength={8} 
         value={cep}
-        onChangeText={setCep}
+        onChangeText={(text) => {
+        const sanitized = text.replace(/[^0-9]/g, '');
+        setCep(sanitized);
+        }}
       />
 
       <Text style={styles.label}>Tipo de veículo</Text>
@@ -99,14 +103,24 @@ export default function CadastroServico() {
         onChangeText={setVeiculo}
       />
 
+      <View style={{ marginTop: 16 }}>
       <Text style={styles.label}>Preço base</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="R$ 250,00"
-        keyboardType="numeric"
-        value={preco}
-        onChangeText={setPreco}
-      />
+      <View style={{ position: 'relative', width: '100%' }}>
+        <Text style={styles.currency}>R$</Text>
+        <TextInput
+          style={[styles.input, { paddingLeft: 30 }]}
+          placeholder="250,00"
+          keyboardType="numeric"
+          value={preco}
+          onChangeText={(text) => {
+          const sanitized = text.replace(/[^0-9.,]/g, '');
+          setPreco(sanitized);
+          }}
+          maxLength={10}
+        />
+      </View>
+      </View>
+
 
       <Text style={styles.label}>Meio de contato</Text>
       <TextInput
@@ -170,4 +184,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+  currency: {
+  position: 'absolute',
+  left: 10,
+  top: '50%',
+  transform: [{ translateY: -10 }],
+  color: '#bfbfbf',
+  fontSize: 16,
+  fontWeight: '600',
+  zIndex: 1,
+},
+
 });
