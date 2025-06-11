@@ -5,9 +5,9 @@ export default function Hotbar(){
     const router = useRouter();
     return(
         <View style={styles.navbar}>
-            <TouchableOpacity style={styles.navItem} onPress={() => router.push('/agendamento')}>
+            <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico')}>
             <Ionicons name="list" size={24} color="black" />
-            <Text>Agendar</Text>
+            <Text>Agendamentos</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>

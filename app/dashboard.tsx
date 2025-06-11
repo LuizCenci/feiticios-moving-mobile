@@ -9,19 +9,19 @@ import Hotbar from './components/hotbar';
 export default function DashboardCliente() {
   const router = useRouter();
   const [cep, setCep] = useState('');
-  const [userName, setUserName] = useState(''); // Estado para o nome
+  const [userName, setUserName] = useState(''); 
   const auth = getAuth();
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUserName(user.displayName); // Pega o nome, se não tiver, mostra o email
+      setUserName(user.displayName); 
     }
   }, []);
 
   const handlePress = () => {
     router.push({
       pathname: '/mudanceiros',
-      params: { cep },  // aqui passa o valor do cep capturado
+      params: { cep },
     });
   }
   const handleLogout = async () => {

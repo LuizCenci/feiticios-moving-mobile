@@ -1,46 +1,210 @@
 import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, db } from '../src/config/firebaseconfig';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+// Importações necessárias do Firebase e React Native
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { auth, db } from '../src/config/firebaseconfig'; 
+import Hotbar from './components/hotbar';
+import { useRouter } from 'expo-router';
 
 export default function HistoricoMudancas() {
+  const router = useRouter();
   const [mudancas, setMudancas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [mensagem, setMensagem] = useState('');
+
+  // 1. A função de estado de status foi removida daqui.
 
   useEffect(() => {
     const fetchMudancas = async () => {
+      setLoading(true);
       const user = auth.currentUser;
-      if (!user) return;
 
-      const q = query(collection(db, 'mudancas'), where('userId', '==', user.uid));
-      const querySnapshot = await getDocs(q);
+      if (!user) {
+        setMensagem('Usuário não autenticado.');
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const agendamentosRef = collection(doc(db, 'usuarios', user.uid), 'agendamentos');
+        const querySnapshot = await getDocs(agendamentosRef);
 
-      const mudancasList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      setMudancas(mudancasList);
+        if (querySnapshot.empty) {
+          setMensagem('Você ainda não tem mudanças registradas.');
+        } else {
+          const mudancasList = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setMudancas(mudancasList);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar agendamentos: ", error);
+        setMensagem("Ocorreu um erro ao buscar seu histórico.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchMudancas();
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        fetchMudancas();
+      } else {
+        setLoading(false);
+        setMensagem('Por favor, faça login para ver seu histórico.');
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
+  
+  // 2. Lógica para finalizar a mudança e atualizar o status
+  const handleFinalizarMudanca = async (itemParaAtualizar) => {
+    try {
+      // Referência ao documento no Firestore
+      const agendamentoRef = doc(db, 'usuarios', auth.currentUser.uid, 'agendamentos', itemParaAtualizar.id);
+
+      // Atualiza o documento no Firestore
+      await updateDoc(agendamentoRef, {
+        status: 'Finalizado'
+      });
+
+      // Atualiza o estado local para refletir a mudança na UI instantaneamente
+      setMudancas(currentMudancas => 
+        currentMudancas.map(m => 
+          m.id === itemParaAtualizar.id ? { ...m, status: 'Finalizado' } : m
+        )
+      );
+
+      // Navega para a tela de avaliação após o sucesso
+      router.push({ 
+        pathname: '/avaliacao', 
+        params: { 
+          mudanceiroId: itemParaAtualizar.mudanceiroId, 
+          agendamentoId: itemParaAtualizar.id 
+        } 
+      });
+
+    } catch (error) {
+      console.error("Erro ao finalizar a mudança:", error);
+      Alert.alert("Erro", "Não foi possível atualizar o status da mudança. Tente novamente.");
+    }
+  };
+
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.cardText}><Text style={styles.label}>Origem:</Text> {item.enderecoOrigem || 'Não informado'}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Destino:</Text> {item.enderecoDestino || 'Não informado'}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Data:</Text> {item.dataAgendamento} </Text>
+      {/* 4. Exibe o status diretamente do item */}
+      <Text style={styles.cardText}><Text style={styles.label}>Status:</Text> {item.status || 'Não informado'}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Mudanceiro:</Text> {item.mudanceiroNome}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Valor:</Text> R$ {item.valorEstimado || '0,00'}</Text>
+      <View style={styles.itemsContainer}>
+        <Text style={styles.label}>Itens da Mudança:</Text>
+        {item.itens.map((item, index) =>
+        <Text key={index} style={styles.itemText}>
+          -{item}
+        </Text>
+        )}
+      </View>
+      
+      {item.status !== 'Finalizado' && (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleFinalizarMudanca(item)}
+        >
+          <Text style={styles.buttonText}>Finalizar Mudança</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6C47A3" />
+        <Text>Buscando seu histórico...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: '#FEF7FF' }}>
       {mudancas.length === 0 ? (
-        <Text>Você ainda não tem mudanças registradas.</Text>
+        <View style={styles.loadingContainer}>
+          <Text>{mensagem}</Text>
+        </View>
       ) : (
-        mudancas.map(mudanca => (
-          <View key={mudanca.id} style={{ marginBottom: 15 }}>
-            <Text>Origem: {mudanca.origem}</Text>
-            <Text>Destino: {mudanca.destino}</Text>
-            <Text>Data: {new Date(mudanca.data).toLocaleDateString()}</Text>
-            <Text>Status: {mudanca.status}</Text>
-          </View>
-        ))
+        <FlatList
+          data={mudancas}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.container}
+          extraData={mudancas} // Garante que a lista atualize quando o estado 'mudancas' mudar
+        />
       )}
+      <Hotbar></Hotbar>
     </View>
   );
 };
 
 
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#FEF7FF',
+    padding: 20,
+    paddingBottom: 50,
+    flexGrow: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FEF7FF', // Adicionado para consistência
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3, // Adicionado para sombra no Android
+  },
+  cardText: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
+  },
+  label: {
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  button: {
+    backgroundColor: '#BF5AF2',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  itemsContainer: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderColor: '#eee',
+  },
+  itemText: {
+    fontSize: 15,
+    color: '#555',
+    marginLeft: 10,
+    marginTop: 5,
+  },
+});
