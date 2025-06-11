@@ -1,98 +1,98 @@
-import { useEffect, useRef, useState } from 'react';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+// 1. Importações necessárias do Firebase para autenticação e escrita no banco
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection } from 'firebase/firestore';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, Card, Provider as PaperProvider, TextInput } from 'react-native-paper';
 import { db } from '../src/config/firebaseconfig';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Button, Card, Menu, Provider as PaperProvider, TextInput } from 'react-native-paper';
 import Hotbar from './components/hotbar';
+
 export default function Agendamento() {
     const router = useRouter(); 
-    const { localizacao, avaliacao, residencial, comercial, fretes, montagem, nome } = useLocalSearchParams();
+    const { localizacao, avaliacao, residencial, comercial, fretes, montagem, nome, valorBase, mudanceiroId } = useLocalSearchParams();
 
-    const [resultados, setResultados] = useState<any[]>([]);
-    const [mudanceiros, setMudanceiros] = useState<string[]>([]);
-
-    const buscarMudanceiros = async () => {
-    try {
-        // Cria query que busca só os usuários com tipo 'mudanceiro'
-        const mudanceiroQuery = query(
-            collection(db, 'usuarios'),
-            where('tipoUsuario', '==', 'mudanceiro')
-        );
-
-        const querySnapshot = await getDocs(mudanceiroQuery);
-        const mudanceirosArray: any[] = [];
-        querySnapshot.forEach((doc) => {
-            mudanceirosArray.push({ id: doc.id, ...doc.data() });
-        });
-
-        setResultados(mudanceirosArray);
-        setMudanceiros(mudanceirosArray.map((m) => m.nome));
-    } catch (error) {
-        console.error('Erro ao buscar mudanceiros:', error);
-        setResultados([]);
-        setMudanceiros([]);
-    }
-};
-
-const filtrarMudanceiros = () => {
-    let filtrados = resultados;
-
-    if (localizacao) {
-        filtrados = filtrados.filter((m) => m.localizacao?.toLowerCase() === localizacao.toLowerCase());
-    }
-
-    if (avaliacao) {
-        const minAvaliacao = parseFloat(avaliacao as string);
-        filtrados = filtrados.filter((m) => parseFloat(m.avaliacao) >= minAvaliacao);
-    }
-
-    const filtrosServicos = {
-        residencial: residencial === 'true',
-        comercial: comercial === 'true',
-        fretes: fretes === 'true',
-        montagem: montagem === 'true',
-    };
-
-    Object.entries(filtrosServicos).forEach(([tipo, ativo]) => {
-        if (ativo) {
-            filtrados = filtrados.filter((m) => m.servicos?.[tipo]);
-        }
-    });
-
-    const nomesFiltrados = filtrados.map((m) => m.nome);
-    setMudanceiros(nomesFiltrados);
-};
-
-useEffect(() => {
-    buscarMudanceiros();
-}, []);
-
-useEffect(() => {
-    if (resultados.length > 0) {
-        filtrarMudanceiros();
-    }
-}, [resultados, localizacao, avaliacao, residencial, comercial, fretes, montagem]);
-
+    // Estados do formulário e de controle
     const [origem, setOrigem] = useState('');
     const [destino, setDestino] = useState('');
     const [itens, setItens] = useState('');
     const [data, setData] = useState('');
     const [hora, setHora] = useState('');
+    const [distancia, setDistancia] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState(null);
 
-    const [mudanceiro, setMudanceiro] = useState('');
-    const [menuVisible, setMenuVisible] = useState(false);
-    const [anchor, setAnchor] = useState(null);
+    // 2. Efeito para obter o usuário autenticado
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser) {
+                setUser(currentUser);
+            } else {
+                console.log("Nenhum usuário logado.");
+                // Opcional: redirecionar para a tela de login se não houver usuário
+                // router.push('/login'); 
+            }
+        });
 
-    const buttonRef = useRef(null);
+        // Limpa a inscrição ao desmontar o componente
+        return () => unsubscribe();
+    }, []);
+    
+    // Lógica de cálculo do valor estimado (permanece a mesma)
+    const valorEstimado = useMemo(() => {
+        const base = parseFloat(valorBase as string) || 0;
+        const km = parseFloat(distancia) || 0;
+        const PRECO_POR_KM = 6;
 
-    const openMenu = () => {
-        if (buttonRef.current) {
-            buttonRef.current.measure((fx, fy, width, height, px, py) => {
-                setAnchor({ x: px, y: py + height - 50 });
-                setMenuVisible(true);
+        if (km === 0) return base;
+        return base + (km * PRECO_POR_KM);
+    }, [distancia, valorBase]);
+
+    // 3. Função para lidar com o agendamento e salvar no Firestore
+    const handleAgendar = async () => {
+        // Valida se o usuário está logado
+        if (!user) {
+            Alert.alert('Erro', 'Você precisa estar logado para agendar uma mudança.');
+            return;
+        }
+        // Valida se os campos obrigatórios foram preenchidos
+        if (!origem || !destino || !distancia || !data || !hora) {
+            Alert.alert('Campos Incompletos', 'Por favor, preencha todos os campos para continuar.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // Cria uma referência para a subcoleção 'agendamentos' do usuário logado
+            const agendamentosCollectionRef = collection(db, 'usuarios', user.uid, 'agendamentos');
+            
+            // Adiciona um novo documento com os dados do agendamento
+            await addDoc(agendamentosCollectionRef, {
+                mudanceiroNome: nome,
+                mudanceiroId: mudanceiroId, // Salva também o ID do mudanceiro
+                clienteId: user.uid,
+                enderecoOrigem: origem,
+                enderecoDestino: destino,
+                // Salva os itens como um array para facilitar a manipulação futura
+                itens: itens.split(',').map(item => item.trim()).filter(item => item),
+                dataAgendamento: data,
+                horaAgendamento: hora,
+                distanciaKm: parseFloat(distancia),
+                valorEstimado: valorEstimado,
+                status: 'agendado', // Define um status inicial
+                dataCriacao: new Date(), // Adiciona um timestamp de quando foi criado
             });
+
+            Alert.alert('Sucesso!', 'Sua mudança foi agendada.');
+            router.push('/dashboard'); // Redireciona para a home após o sucesso
+
+        } catch (error) {
+            console.error("Erro ao agendar mudança: ", error);
+            Alert.alert('Erro', 'Ocorreu um erro ao agendar sua mudança. Tente novamente.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -109,6 +109,14 @@ useEffect(() => {
                     <Card.Content>
                         <Text style={styles.subtitle}>Agende sua mudança</Text>
 
+                        <TextInput
+                            label="Mudanceiro Selecionado"
+                            value={nome as string || 'Não especificado'}
+                            editable={false} 
+                            style={styles.input}
+                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
+                            textColor='#808080'
+                        />
                         <TextInput
                             textColor="#000"
                             label="Endereço de origem"
@@ -127,7 +135,16 @@ useEffect(() => {
                         />
                         <TextInput
                             textColor="#000"
-                            label="Itens da mudança"
+                            label="Distância da Viagem (KM)"
+                            value={distancia}
+                            onChangeText={setDistancia}
+                            style={styles.input}
+                            keyboardType="numeric"
+                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
+                        />
+                        <TextInput
+                            textColor="#000"
+                            label="Itens da mudança (separados por vírgula)"
                             value={itens}
                             onChangeText={setItens}
                             style={styles.input}
@@ -154,68 +171,32 @@ useEffect(() => {
                                 theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
                             />
                         </View>
-                        <TextInput
-                                textColor="#000"
-                                label="nome"
-                                value={nome}
-                                onChangeText={setHora}
-                                style={[styles.input, { flex: 1 }]}
-                                placeholder="--:--"
-                                theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                            />
-                        <View style={styles.menuContainer}>
-                            
-
-                            <Button
-                                mode="outlined"
-                                onPress={openMenu}
-                                style={styles.dropdownButton}
-                                labelStyle={{ color: '#000' }}
-                                contentStyle={{ justifyContent: 'space-between' }}
-                                ref={buttonRef}
-                            >
-                                {mudanceiro || 'Selecione...'}
-                            </Button>
-
-                            <Menu
-                                visible={menuVisible}
-                                onDismiss={() => setMenuVisible(false)}
-                                anchor={anchor}
-                                style={styles.dropdownMenu}
-                            >
-                                {mudanceiros.length === 0 ? (
-                                    <Menu.Item title="Nenhum disponível" disabled />
-                                ) : (
-                                    mudanceiros.map((option, index) => (
-                                        <Menu.Item
-                                            key={index}
-                                            onPress={() => {
-                                                setMudanceiro(option);
-                                                setMenuVisible(false);
-                                            }}
-                                            title={option}
-                                            titleStyle={{ color: '#000' }}
-                                        />
-                                    ))
-                                )}
-                            </Menu>
-                        </View>
-
+                        
                         <View style={styles.resumo}>
-                            <Text style={styles.resumoTitle}>Resumo</Text>
-                            <Text>• Distância: 12km</Text>
-                            <Text>• Itens: sofá, geladeira, 10 caixas</Text>
-                            <Text>• Valor estimado: R$180</Text>
+                            <Text style={styles.resumoTitle}>Resumo do Agendamento</Text>
+                            <Text style={styles.resumoItem}>• Mudanceiro: {nome || 'N/A'}</Text>
+                            <Text style={styles.resumoItem}>• Distância: {distancia ? `${distancia} km` : 'Aguardando informação'}</Text>
+                            <Text style={styles.resumoItem}>• Itens: {itens || 'Nenhum item informado'}</Text>
+                            <Text style={styles.valorFinal}>
+                                • Valor estimado: {valorEstimado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </Text>
                         </View>
 
-                        <Button mode="contained" style={styles.botao} textColor="#000">
-                            Agendar Mudança
+                        {/* 4. Botão atualizado para chamar a função e mostrar estado de loading */}
+                        <Button 
+                            mode="contained" 
+                            style={styles.botao} 
+                            textColor="#fff"
+                            onPress={handleAgendar}
+                            disabled={loading}
+                        >
+                            {loading ? 'Agendando...' : 'Agendar Mudança'}
                         </Button>
                     </Card.Content>
                 </Card>
                 
             </ScrollView>
-            <Hotbar></Hotbar>   
+            <Hotbar />
         </PaperProvider>
     );
 }
@@ -251,52 +232,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    menuContainer: {
-        marginVertical: 12,
-    },
-    pickerLabel: {
-        marginBottom: 4,
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#000',
-    },
-    dropdownButton: {
-        borderColor: '#d1d5db',
-        borderWidth: 1,
-        borderRadius: 12,
-        backgroundColor: '#fff',
-        height: 50,
-        justifyContent: 'center',
-    },
-    dropdownMenu: {
-        borderRadius: 12,
-        backgroundColor: '#fff',
-    },
     resumo: {
         marginVertical: 16,
         backgroundColor: '#f8fafc',
         padding: 12,
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
     },
     resumoTitle: {
         fontWeight: 'bold',
-        marginBottom: 6,
+        marginBottom: 8,
+        fontSize: 16,
+    },
+    resumoItem: {
+      marginBottom: 4,
+    },
+    valorFinal: {
+        fontWeight: 'bold',
+        marginTop: 6,
+        color: '#166534' // Cor verde para destacar o valor
     },
     botao: {
-        color: '#fff',
         backgroundColor: '#d946ef',
         marginTop: 8,
-    },
-    labelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    filterIcon: {
-        backgroundColor: '#9b59b6',
-        borderRadius: 16,
-        padding: 6,
-        marginLeft: 10,
+        paddingVertical: 4,
     },
 });

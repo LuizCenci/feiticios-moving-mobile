@@ -1,11 +1,10 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../src/config/firebaseconfig';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import Hotbar from './components/hotbar';
 import FiltroBotao from './components/filtroBotao';
+import Hotbar from './components/hotbar';
 interface Mudanceiro {
   userID: string;
   nome: string;
@@ -133,7 +132,7 @@ export default function Mudanceiros() {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push({ pathname: '/agendamento', params: { mudanceiroId: item.userID, nome:item.nome } })}
+                onPress={() => router.push({ pathname: '/agendamento', params: { mudanceiroId: item.userID, nome:item.nome, valorBase: item.servicos[0].preco } })}
               >
                 <Text style={styles.buttonText}>Selecionar</Text>
               </TouchableOpacity>
