@@ -236,9 +236,14 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     input: {
-        marginBottom: 12,
-        backgroundColor: '#fff',
-    },
+    borderWidth: 1,
+    borderColor: '#BF5AF2',
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: '#000',
+  },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
