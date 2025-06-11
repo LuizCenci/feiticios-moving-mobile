@@ -1,18 +1,38 @@
 import { useRouter } from 'expo-router';
+import { getAuth, signOut } from 'firebase/auth';
 import { Truck  } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, TextInput } from 'react-native';
 import HotbarMudanceiro from './components/hotbarMudanceiro';
+import Hotbar from './components/hotbar';
 
 export default function DashboardCliente() {
   const router = useRouter();
   const [cep, setCep] = useState('');
+  const [userName, setUserName] = useState(''); // Estado para o nome
+  const auth = getAuth();
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setUserName(user.displayName); // Pega o nome, se não tiver, mostra o email
+    }
+  }, []);
 
+  const handlePress = () => {
+    router.push({
+      pathname: '/mudanceiros',
+      params: { cep },  // aqui passa o valor do cep capturado
+    });
+  }
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.replace('/login');
+  };
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ ...styles.container, flexGrow: 1 }}>
         <Image source={require('../assets/images/cauldron.png')} style={styles.logo} />
-        <Text style={styles.title}>Olá, cliente!</Text>
+        <Text style={styles.title}>Olá, {userName}!</Text>
         <Text style={styles.subtitle}>Para onde você quer se mudar?</Text>
 
         <TextInput
@@ -24,22 +44,16 @@ export default function DashboardCliente() {
           keyboardType="numeric"
         />
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            console.log('CEP digitado:', cep);
-            // router.push('/rota-para-mudar-ou-agendar');
-          }}
-        >
+        <TouchableOpacity style={styles.button} onPress={handlePress}>
           <Truck size={24} color="#fff" style={{ marginRight: 10 }} />
           <Text style={styles.buttonText}>Iniciar mudança</Text>
         </TouchableOpacity>
       </ScrollView>
-      <HotbarMudanceiro />
+      <Hotbar />
     </View>
   );
-}
 
+}
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FEF7FF',
@@ -90,4 +104,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-});
+})
