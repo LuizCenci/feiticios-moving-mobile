@@ -10,8 +10,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { database } from '../src/config/firebaseconfig';
-
+import { Picker } from '@react-native-picker/picker';
+import { db } from '../src/config/firebaseconfig';
+//adadadada
 export default function CadastroServico() {
   const [tipoServico, setTipoServico] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
@@ -44,11 +45,13 @@ export default function CadastroServico() {
         veiculo,
         preco,
         contato,
-        criadoEm: new Date().toISOString(),
+        criadoEm: new Date(),
       });
 
-      Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!')
+      Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!');
       router.replace('/dashboard');
+
+      // Limpar campos
       setTipoServico('');
       setDescricao('');
       setCep('');
