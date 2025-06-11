@@ -1,5 +1,6 @@
+
 import { useRouter } from 'expo-router';
-import { Calendar, ClipboardList } from 'lucide-react-native';
+import { Calendar, ClipboardList, AlignJustify  } from 'lucide-react-native';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -18,6 +19,13 @@ export default function DashboardMudanceiro() {
       >
         <ClipboardList size={24} color="#fff" style={{ marginRight: 10 }} />
         <Text style={styles.buttonText}>Cadastrar novo serviço</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/servicos')}
+      >
+        <AlignJustify  size={24} color="#fff" style={{ marginRight: 10 }} />
+        <Text style={styles.buttonText}>Listar meus serviços</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
