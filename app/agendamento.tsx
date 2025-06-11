@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { firestore } from '../src/config/firebaseconfig';
+import { db } from '../src/config/firebaseconfig';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Button, Card, Menu, Provider as PaperProvider, TextInput } from 'react-native-paper';
 
@@ -14,60 +14,66 @@ export default function Agendamento() {
     const [mudanceiros, setMudanceiros] = useState<string[]>([]);
 
     const buscarMudanceiros = async () => {
-        try {
-            const querySnapshot = await getDocs(collection(firestore, 'mudanceiro'));
-            const mudanceirosArray: any[] = [];
-            querySnapshot.forEach((doc) => {
-                mudanceirosArray.push({ id: doc.id, ...doc.data() });
-            });
+    try {
+        // Cria query que busca só os usuários com tipo 'mudanceiro'
+        const mudanceiroQuery = query(
+            collection(db, 'usuarios'),
+            where('tipoUsuario', '==', 'mudanceiro')
+        );
 
-            setResultados(mudanceirosArray);
-            setMudanceiros(mudanceirosArray.map((m) => m.nome));
-        } catch (error) {
-            console.error('Erro ao buscar mudanceiros:', error);
-            setResultados([]);
-            setMudanceiros([]);
-        }
-    };
-
-    const filtrarMudanceiros = () => {
-        let filtrados = resultados;
-
-        if (localizacao) {
-            filtrados = filtrados.filter((m) => m.localizacao?.toLowerCase() === localizacao.toLowerCase());
-        }
-
-        if (avaliacao) {
-            const minAvaliacao = parseFloat(avaliacao as string);
-            filtrados = filtrados.filter((m) => parseFloat(m.avaliacao) >= minAvaliacao);
-        }
-
-        const filtrosServicos = {
-            residencial: residencial === 'true',
-            comercial: comercial === 'true',
-            fretes: fretes === 'true',
-            montagem: montagem === 'true',
-        };
-
-        Object.entries(filtrosServicos).forEach(([tipo, ativo]) => {
-            if (ativo) {
-                filtrados = filtrados.filter((m) => m.servicos?.[tipo]);
-            }
+        const querySnapshot = await getDocs(mudanceiroQuery);
+        const mudanceirosArray: any[] = [];
+        querySnapshot.forEach((doc) => {
+            mudanceirosArray.push({ id: doc.id, ...doc.data() });
         });
 
-        const nomesFiltrados = filtrados.map((m) => m.nome);
-        setMudanceiros(nomesFiltrados);
+        setResultados(mudanceirosArray);
+        setMudanceiros(mudanceirosArray.map((m) => m.nome));
+    } catch (error) {
+        console.error('Erro ao buscar mudanceiros:', error);
+        setResultados([]);
+        setMudanceiros([]);
+    }
+};
+
+const filtrarMudanceiros = () => {
+    let filtrados = resultados;
+
+    if (localizacao) {
+        filtrados = filtrados.filter((m) => m.localizacao?.toLowerCase() === localizacao.toLowerCase());
+    }
+
+    if (avaliacao) {
+        const minAvaliacao = parseFloat(avaliacao as string);
+        filtrados = filtrados.filter((m) => parseFloat(m.avaliacao) >= minAvaliacao);
+    }
+
+    const filtrosServicos = {
+        residencial: residencial === 'true',
+        comercial: comercial === 'true',
+        fretes: fretes === 'true',
+        montagem: montagem === 'true',
     };
 
-    useEffect(() => {
-        buscarMudanceiros();
-    }, []);
-
-    useEffect(() => {
-        if (resultados.length > 0) {
-            filtrarMudanceiros();
+    Object.entries(filtrosServicos).forEach(([tipo, ativo]) => {
+        if (ativo) {
+            filtrados = filtrados.filter((m) => m.servicos?.[tipo]);
         }
-    }, [resultados, localizacao, avaliacao, residencial, comercial, fretes, montagem]);
+    });
+
+    const nomesFiltrados = filtrados.map((m) => m.nome);
+    setMudanceiros(nomesFiltrados);
+};
+
+useEffect(() => {
+    buscarMudanceiros();
+}, []);
+
+useEffect(() => {
+    if (resultados.length > 0) {
+        filtrarMudanceiros();
+    }
+}, [resultados, localizacao, avaliacao, residencial, comercial, fretes, montagem]);
 
     const [origem, setOrigem] = useState('');
     const [destino, setDestino] = useState('');

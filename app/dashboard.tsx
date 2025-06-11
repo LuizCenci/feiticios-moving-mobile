@@ -1,8 +1,16 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import {useRouter} from 'expo-router'
 
-export default function Home() {
+export default function Mudanceiros() {
+    const [cep, setCep] = useState('');
+    const handlePress = () => {
+      router.push({
+        pathname: '/mudanceiros',
+        params: { cep },  // aqui passa o valor do cep capturado
+      });
+    };
     const router = useRouter(); 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -10,9 +18,14 @@ export default function Home() {
         <Text style={styles.title}>Feitiços moving</Text>
 
         <Text style={styles.label}>Para onde você quer se mudar?</Text>
-        <TextInput style={styles.input} placeholder="Digite a Cidade ou Bairro" />
+        <TextInput
+          style={styles.input}
+          placeholder="Digite seu CEP"
+          value={cep}
+          onChangeText={setCep}  
+        />
 
-        <TouchableOpacity style={styles.button} onPress={()=> router.push('/agendamento')}>
+        <TouchableOpacity style={styles.button} onPress={handlePress}>
             <Text style={styles.buttonText}>Iniciar Mudança</Text>
         </TouchableOpacity>
 

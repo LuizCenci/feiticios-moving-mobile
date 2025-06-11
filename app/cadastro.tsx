@@ -4,9 +4,6 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Lock, Mail, Truck } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../src/config/firebaseconfig';
 
 export default function Cadastro() {

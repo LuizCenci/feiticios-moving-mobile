@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { db } from '../src/config/firebaseconfig';
-
+//adadadada
 export default function CadastroServico() {
   const [tipoServico, setTipoServico] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
