@@ -1,10 +1,12 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Hotbar from './components/hotbar';
-import { collection, addDoc } from 'firebase/firestore';
-import { auth, db } from '../src/config/firebaseconfig';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { addDoc, collection, getFirestore, Timestamp } from 'firebase/firestore';
+import { app, auth } from '../src/config/firebaseconfig';
+
+const db = getFirestore(app);
 
 const Avaliacao = () => {
   const router = useRouter();
@@ -17,38 +19,18 @@ const Avaliacao = () => {
 
   const renderStars = (category: keyof typeof avaliacoes) => {
     const stars = [];
-    const rating = avaliacoes[category];
-
     for (let i = 1; i <= 5; i++) {
-      let iconName: 'star' | 'star-half-full' | 'star-o' = 'star-o';
-
-      if (rating >= i) {
-        iconName = 'star';
-      } else if (rating >= i - 0.5) {
-        iconName = 'star-half-full';
-      }
-
       stars.push(
-        <View key={i} style={{ flexDirection: 'row' }}>
-          <TouchableOpacity
-            onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i - 0.5 })}
-            style={{ width: 15, alignItems: 'flex-end' }}
-          >
-            <FontAwesome
-              name={iconName}
-              size={30}
-              color="#8A2BE2"
-              style={{ marginHorizontal: 1 }}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i })}
-            style={{ width: 15 }}
+        <TouchableOpacity key={i} onPress={() => setAvaliacoes({ ...avaliacoes, [category]: i })}>
+          <FontAwesome
+            name="star"
+            size={30}
+            color={i <= avaliacoes[category] ? '#8A2BE2' : '#ccc'}
+            style={{ marginHorizontal: 2 }}
           />
-        </View>
+        </TouchableOpacity>
       );
     }
-
     return <View style={styles.stars}>{stars}</View>;
   };
 
@@ -62,18 +44,16 @@ const Avaliacao = () => {
     const novaAvaliacao = {
       ...avaliacoes,
       feedback,
-      userId: user.uid,
-      data: new Date().toISOString()
+      data: Timestamp.now(),
+      usuarioId: user.uid
     };
 
     try {
-      const avaliacaoRef = collection(db, 'avaliacoes');
-      await addDoc(avaliacaoRef, novaAvaliacao);
-
+      await addDoc(collection(db, 'avaliacoes'), novaAvaliacao);
       Alert.alert('Sucesso', 'Avaliação enviada com sucesso!');
       setAvaliacoes({ tempo: 0, itens: 0, atendimento: 0 });
       setFeedback('');
-      router.push('/dashboard');
+      router.push('/');
     } catch (error) {
       console.error('Erro ao enviar avaliação:', error);
       Alert.alert('Erro', 'Erro ao enviar avaliação. Tente novamente.');
@@ -81,37 +61,31 @@ const Avaliacao = () => {
   };
 
   return (
-    
-      <View style={{flex:1}}>
-        <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.title}>Avalie sua experiência:</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Avalie sua experiência:</Text>
 
-          <Text style={styles.label}>Tempo de entrega:</Text>
-          {renderStars('tempo')}
+      <Text style={styles.label}>Tempo de entrega:</Text>
+      {renderStars('tempo')}
 
-          <Text style={styles.label}>Condição dos itens:</Text>
-          {renderStars('itens')}
+      <Text style={styles.label}>Condição dos itens:</Text>
+      {renderStars('itens')}
 
-          <Text style={styles.label}>Atendimento:</Text>
-          {renderStars('atendimento')}
+      <Text style={styles.label}>Atendimento:</Text>
+      {renderStars('atendimento')}
 
-          <Text style={styles.label}>Feedback:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Escreva aqui..."
-            value={feedback}
-            onChangeText={setFeedback}
-            multiline
-          />
+      <Text style={styles.label}>Feedback:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Escreva aqui..."
+        value={feedback}
+        onChangeText={setFeedback}
+        multiline
+      />
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Enviar Avaliação</Text>
-          </TouchableOpacity>
-        </ScrollView>
-        <Hotbar></Hotbar>
-      </View>
-    
-    
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Enviar Avaliação</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
