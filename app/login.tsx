@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../src/config/firebaseconfig';
+import { doc, getDoc } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { auth, db } from '../src/config/firebaseconfig';
+
 
 const Login = () => {
     const router = useRouter();
@@ -11,26 +13,45 @@ const Login = () => {
     const [senha, setSenha] = useState('');
     const [erro, setErro] = useState('');
 
-    const handleLogin = async () => {
-        if (!email || !senha) {
-            setErro('Preencha todos os campos.');
-            return;
+const handleLogin = async () => {
+    if (!email || !senha) {
+        setErro('Preencha todos os campos.');
+        return;
+    }
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+        const user = userCredential.user;
+
+        const userDocRef = doc(db, 'usuarios', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const tipoUsuario = userData.tipoUsuario;
+
+            if (tipoUsuario === 'cliente') {
+                router.replace('/dashboard');
+            } else if (tipoUsuario === 'mudanceiro') {
+                router.replace('/dashboardMudanceiro');
+            } else {
+                setErro('Tipo de usuário inválido.');
+            }
+        } else {
+            setErro('Usuário não encontrado no banco de dados.');
         }
 
-        try {
-            await signInWithEmailAndPassword(auth, email, senha);
-            setErro('');
-            router.replace('/dashboard'); // vai para tela de dashboard
-        } catch (error: any) {
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-email-password') {
-                setErro('E-mail ou senha incorretos.');
-        
-            } else {
-                setErro('Erro ao fazer login. Tente novamente mais tarde.');
-                console.log(error.code);
-            }
+        setErro('');
+    } catch (error: any) {
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-email-password') {
+            setErro('E-mail ou senha incorretos.');
+        } else {
+            setErro('Erro ao fazer login. Tente novamente mais tarde.');
+            console.log(error.code);
         }
-    };
+    }
+};
+
 
     return (
         <View style={styles.container}>
