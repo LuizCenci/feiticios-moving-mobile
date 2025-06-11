@@ -107,7 +107,7 @@ export default function Mudanceiros() {
 
   return (
     <View style={{flex:1, backgroundColor:'#FEF7FF'}}>
-      <FiltroBotao onPress={() => router.push({ pathname: '/filter', params: { cep } })}></FiltroBotao>
+      <FiltroBotao onPress={() => router.push({ pathname: '/filter', params: { cep:cep } })}></FiltroBotao>
       <ScrollView contentContainerStyle={styles.container}>
         
         <FlatList
@@ -133,7 +133,7 @@ export default function Mudanceiros() {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push({ pathname: '/agendamento', params: { mudanceiroId: item.userID } })}
+                onPress={() => router.push({ pathname: '/agendamento', params: { mudanceiroId: item.userID, nome:item.nome } })}
               >
                 <Text style={styles.buttonText}>Selecionar</Text>
               </TouchableOpacity>

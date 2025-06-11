@@ -7,8 +7,8 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { Button, Card, Menu, Provider as PaperProvider, TextInput } from 'react-native-paper';
 import Hotbar from './components/hotbar';
 export default function Agendamento() {
-    const router = useRouter();
-    const { localizacao, avaliacao, residencial, comercial, fretes, montagem } = useLocalSearchParams();
+    const router = useRouter(); 
+    const { localizacao, avaliacao, residencial, comercial, fretes, montagem, nome } = useLocalSearchParams();
 
     const [resultados, setResultados] = useState<any[]>([]);
     const [mudanceiros, setMudanceiros] = useState<string[]>([]);
@@ -154,7 +154,15 @@ useEffect(() => {
                                 theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
                             />
                         </View>
-
+                        <TextInput
+                                textColor="#000"
+                                label="nome"
+                                value={nome}
+                                onChangeText={setHora}
+                                style={[styles.input, { flex: 1 }]}
+                                placeholder="--:--"
+                                theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
+                            />
                         <View style={styles.menuContainer}>
                             
 
