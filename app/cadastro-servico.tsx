@@ -2,16 +2,9 @@ import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { push, ref } from 'firebase/database';
 import React, { useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import { database } from '../src/config/firebaseconfig';
+import { getAuth } from 'firebase/auth';
 
 export default function CadastroServico() {
   const [tipoServico, setTipoServico] = useState('');
@@ -29,6 +22,14 @@ export default function CadastroServico() {
       return;
     }
 
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+    Alert.alert('Erro', 'Usuário não autenticado!');
+    return;
+  }
+
     try {
       const servicosRef = ref(database, 'servicos');
       await push(servicosRef, {
@@ -39,6 +40,7 @@ export default function CadastroServico() {
         preco,
         contato,
         criadoEm: new Date().toISOString(),
+        mudanceiroId: user.uid,
       });
 
       Alert.alert('Sucesso', 'Serviço cadastrado com sucesso!')
