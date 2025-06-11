@@ -179,8 +179,8 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#6C47A3',
-    borderRadius: 8,
+    borderColor: '#BF5AF2',
+    borderRadius: 25,
     backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -188,12 +188,13 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: '#6C47A3',
-    borderRadius: 8,
+    borderColor: '#BF5AF2',
+    borderRadius: 25,
     backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
+
   button: {
     marginTop: 30,
     backgroundColor: '#BF5AF2',

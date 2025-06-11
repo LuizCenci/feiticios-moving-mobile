@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   container: { padding: 20 },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
   label: { fontSize: 16, marginTop: 15 },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginTop: 10, borderRadius: 5, minHeight: 80 },
+  input: { borderWidth: 1, borderColor: '#BF5AF2', padding: 10, marginTop: 10, borderRadius: 25, minHeight: 80 },
   button: { backgroundColor: '#8A2BE2', padding: 15, borderRadius: 8, marginTop: 20 },
   buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   stars: { flexDirection: 'row', marginTop: 10 },
