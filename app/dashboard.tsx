@@ -1,50 +1,85 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import {useRouter} from 'expo-router'
+import { useRouter } from 'expo-router';
+import { getAuth, signOut } from 'firebase/auth';
+import React, { useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Mudanceiros() {
-    const [cep, setCep] = useState('');
-    const handlePress = () => {
-      router.push({
-        pathname: '/mudanceiros',
-        params: { cep },  // aqui passa o valor do cep capturado
-      });
-    };
-    const router = useRouter(); 
-    return (
-        <ScrollView contentContainerStyle={styles.container}>
-        <Image source={require('../assets/images/cauldron.png')} style={{ width: 70, height: 70, marginBottom: 10, marginLeft: 150 }} />
-        <Text style={styles.title}>Feitiços moving</Text>
+  const [cep, setCep] = useState('');
+  const handlePress = () => {
+    router.push({
+      pathname: '/mudanceiros',
+      params: { cep },  // aqui passa o valor do cep capturado
+    });
+  };
+  const router = useRouter();
+  const auth = getAuth();
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.replace('/login');
+  };
 
-        <Text style={styles.label}>Para onde você quer se mudar?</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Digite seu CEP"
-          value={cep}
-          onChangeText={setCep}  
-        />
+  return (
+  <View style={{ flex: 1 }}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Image
+        source={require('../assets/images/cauldron.png')}
+        style={{ width: 70, height: 70, marginBottom: 10, marginLeft: 150 }}
+      />
+      <Text style={styles.title}>Feitiços moving</Text>
 
-        <TouchableOpacity style={styles.button} onPress={handlePress}>
-            <Text style={styles.buttonText}>Iniciar Mudança</Text>
-        </TouchableOpacity>
+      <Text style={styles.label}>Para onde você quer se mudar?</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Digite seu CEP"
+        value={cep}
+        onChangeText={setCep}
+      />
 
-        <Text style={styles.subTitle}>Tipo de Mudança</Text>
+      <TouchableOpacity style={styles.button} onPress={handlePress}>
+        <Text style={styles.buttonText}>Iniciar Mudança</Text>
+      </TouchableOpacity>
 
-        <View style={styles.tagsContainer}>
-            <TouchableOpacity style={styles.tag}><Ionicons name="home" size={16} /> <Text>Residencial</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.tag}><Ionicons name="business" size={16} /> <Text>Empresarial</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.tag}><Ionicons name="construct" size={16} /> <Text>Desmontagem</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.tag}><Ionicons name="cube" size={16} /> <Text>Apenas Entrega</Text></TouchableOpacity>
-        </View>
+      <Text style={styles.subTitle}>Tipo de Mudança</Text>
 
-        <Text style={styles.subTitle}>Mudanceiros em Destaque</Text>
-        <View style={styles.card}>
-            <Text style={styles.company}>Empresa X</Text>
-            <Text style={styles.stars}>⭐⭐⭐⭐⭐</Text>
-        </View>
-        </ScrollView>
-    );
+      <View style={styles.tagsContainer}>
+        <TouchableOpacity style={styles.tag}><Ionicons name="home" size={16} /> <Text>Residencial</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.tag}><Ionicons name="business" size={16} /> <Text>Empresarial</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.tag}><Ionicons name="construct" size={16} /> <Text>Desmontagem</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.tag}><Ionicons name="cube" size={16} /> <Text>Apenas Entrega</Text></TouchableOpacity>
+      </View>
+
+      <Text style={styles.subTitle}>Mudanceiros em Destaque</Text>
+      <View style={styles.card}>
+        <Text style={styles.company}>Empresa X</Text>
+        <Text style={styles.stars}>⭐⭐⭐⭐⭐</Text>
+      </View>
+    </ScrollView>
+
+    <View style={styles.navbar}>
+  <TouchableOpacity style={styles.navItem} onPress={() => router.push('/agendamento')}>
+    <Ionicons name="list" size={24} color="black" />
+    <Text>Agendar</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
+    <Ionicons name="home" size={24} color="black" />
+    <Text>Home</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/login')}>
+    <Ionicons name="log-out-outline" size={24} color="black" />
+    <Text>Sair</Text>
+  </TouchableOpacity>
+</View>
+
+
+  </View>
+);
+
+
+    
+  
 }
 
 const styles = StyleSheet.create({
@@ -128,4 +163,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 4,
   },
+  navbar: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  paddingVertical: 10,
+  borderTopWidth: 1,
+  borderTopColor: '#ccc',
+  backgroundColor: '#fff',
+  paddingHorizontal: 20,
+},
+navItem: {
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+
+
 });
