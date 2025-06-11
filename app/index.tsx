@@ -14,6 +14,7 @@ export default function index(){
             <Button title='avaliar' onPress={() => router.push('/avaliacao')}/>
             <Button title='dashboard' onPress={() => router.push('/dashboard')}/>
             <Button title='dashboardMudanceiro' onPress={() => router.push('/dashboardMudanceiro')}/>
+            <Button title='agenda' onPress={() => router.push('/agenda')}/>
         </View>
     );
     
