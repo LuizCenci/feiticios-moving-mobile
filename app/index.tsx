@@ -1,7 +1,10 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View, Button } from 'react-native';
 import {useRouter} from 'expo-router'
 import { NavigationContainer } from '@react-navigation/native';
+import { Button, View } from 'react-native';
+
 export default function index(){
     const router = useRouter();
     return(
@@ -13,6 +16,7 @@ export default function index(){
             <Button title='agendamento' onPress={() => router.push('/agendamento')}/>
             <Button title='avaliar' onPress={() => router.push('/avaliacao')}/>
             <Button title='dashboard' onPress={() => router.push('/dashboard')}/>
+            <Button title='dashboardMudanceiro' onPress={() => router.push('/dashboardMudanceiro')}/>
         </View>
     );
     
