@@ -1,16 +1,16 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-// 1. Importações necessárias do Firebase para autenticação e escrita no banco
+// 1. Importações necessárias do Firebase (sem alterações na lógica)
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection } from 'firebase/firestore';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, Provider as PaperProvider, TextInput } from 'react-native-paper';
+// 2. Componentes nativos do React Native para estilização consistente
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { db } from '../src/config/firebaseconfig';
 import Hotbar from './components/hotbar';
 
 export default function Agendamento() {
     const router = useRouter(); 
-    const { localizacao, avaliacao, residencial, comercial, fretes, montagem, nome, valorBase, mudanceiroId } = useLocalSearchParams();
+    const { nome, valorBase, mudanceiroId } = useLocalSearchParams();
 
     // Estados do formulário e de controle
     const [origem, setOrigem] = useState('');
@@ -22,7 +22,7 @@ export default function Agendamento() {
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState(null);
 
-    // 2. Efeito para obter o usuário autenticado
+    // Efeito para obter o usuário autenticado
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -30,64 +30,78 @@ export default function Agendamento() {
                 setUser(currentUser);
             } else {
                 console.log("Nenhum usuário logado.");
-                // Opcional: redirecionar para a tela de login se não houver usuário
-                // router.push('/login'); 
             }
         });
-
-        // Limpa a inscrição ao desmontar o componente
         return () => unsubscribe();
     }, []);
     
-    // Lógica de cálculo do valor estimado (permanece a mesma)
+    // Lógica de cálculo do valor estimado
     const valorEstimado = useMemo(() => {
         const base = parseFloat(valorBase as string) || 0;
         const km = parseFloat(distancia) || 0;
         const PRECO_POR_KM = 6;
-
         if (km === 0) return base;
         return base + (km * PRECO_POR_KM);
     }, [distancia, valorBase]);
 
-    // 3. Função para lidar com o agendamento e salvar no Firestore
+    // 3. Funções de formatação CORRIGIDAS para data e hora
+    const formatDate = (text: string) => {
+        // Remove tudo que não for dígito
+        const cleaned = text.replace(/\D/g, '');
+        const cleanedLength = cleaned.length;
+
+        // Formata dd/mm/yyyy dinamicamente
+        if (cleanedLength > 4) {
+            return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+        } else if (cleanedLength > 2) {
+            return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+        }
+        
+        return cleaned;
+    };
+
+    const formatTime = (text: string) => {
+        // Remove tudo que não for dígito
+        const cleaned = text.replace(/\D/g, '');
+        const cleanedLength = cleaned.length;
+
+        // Formata hh:mm dinamicamente
+        if (cleanedLength > 2) {
+            return `${cleaned.slice(0, 2)}:${cleaned.slice(2, 4)}`;
+        }
+
+        return cleaned;
+    };
+
+    // Função para lidar com o agendamento
     const handleAgendar = async () => {
-        // Valida se o usuário está logado
         if (!user) {
             Alert.alert('Erro', 'Você precisa estar logado para agendar uma mudança.');
             return;
         }
-        // Valida se os campos obrigatórios foram preenchidos
         if (!origem || !destino || !distancia || !data || !hora) {
             Alert.alert('Campos Incompletos', 'Por favor, preencha todos os campos para continuar.');
             return;
         }
-
         setLoading(true);
-
         try {
-            // Cria uma referência para a subcoleção 'agendamentos' do usuário logado
             const agendamentosCollectionRef = collection(db, 'usuarios', user.uid, 'agendamentos');
-            
-            // Adiciona um novo documento com os dados do agendamento
             await addDoc(agendamentosCollectionRef, {
                 mudanceiroNome: nome,
-                mudanceiroId: mudanceiroId, // Salva também o ID do mudanceiro
+                mudanceiroId: mudanceiroId,
                 clienteId: user.uid,
                 enderecoOrigem: origem,
                 enderecoDestino: destino,
-                // Salva os itens como um array para facilitar a manipulação futura
                 itens: itens.split(',').map(item => item.trim()).filter(item => item),
                 dataAgendamento: data,
                 horaAgendamento: hora,
                 distanciaKm: parseFloat(distancia),
                 valorEstimado: valorEstimado,
-                status: 'agendado', // Define um status inicial
-                dataCriacao: new Date(), // Adiciona um timestamp de quando foi criado
+                status: 'agendado',
+                dataCriacao: new Date(),
             });
-
             Alert.alert('Sucesso!', 'Sua mudança foi agendada.');
-            router.push('/dashboard'); // Redireciona para a home após o sucesso
-
+            router.push('/dashboard');
         } catch (error) {
             console.error("Erro ao agendar mudança: ", error);
             Alert.alert('Erro', 'Ocorreu um erro ao agendar sua mudança. Tente novamente.');
@@ -97,165 +111,168 @@ export default function Agendamento() {
     };
 
     return (
-        <PaperProvider>
+        <View style={{flex: 1, backgroundColor: '#FEF7FF'}}>
             <ScrollView contentContainerStyle={styles.container}>
                 <Image
                     source={require('../assets/images/cauldron.png')}
-                    style={{ width: 60, height: 60, marginBottom: 5 }}
+                    style={styles.logo}
                 />
-                <Text style={styles.title}>Feitiços Moving</Text>
+                <Text style={styles.title}>Agende sua Mudança</Text>
 
-                <Card style={styles.card}>
-                    <Card.Content>
-                        <Text style={styles.subtitle}>Agende sua mudança</Text>
+                <TextInput
+                    style={[styles.input, styles.disabledInput]}
+                    value={`Mudanceiro: ${nome as string || 'Não especificado'}`}
+                    editable={false} 
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Endereço de origem"
+                    value={origem}
+                    onChangeText={setOrigem}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Endereço de destino"
+                    value={destino}
+                    onChangeText={setDestino}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Distância da Viagem (KM)"
+                    value={distancia}
+                    onChangeText={setDistancia}
+                    keyboardType="numeric"
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Itens (ex: sofá, geladeira, 10 caixas)"
+                    value={itens}
+                    onChangeText={setItens}
+                />
 
-                        <TextInput
-                            label="Mudanceiro Selecionado"
-                            value={nome as string || 'Não especificado'}
-                            editable={false} 
-                            style={styles.input}
-                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                            textColor='#808080'
-                        />
-                        <TextInput
-                            textColor="#000"
-                            label="Endereço de origem"
-                            value={origem}
-                            onChangeText={setOrigem}
-                            style={styles.input}
-                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                        />
-                        <TextInput
-                            textColor="#000"
-                            label="Endereço de destino"
-                            value={destino}
-                            onChangeText={setDestino}
-                            style={styles.input}
-                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                        />
-                        <TextInput
-                            textColor="#000"
-                            label="Distância da Viagem (KM)"
-                            value={distancia}
-                            onChangeText={setDistancia}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                        />
-                        <TextInput
-                            textColor="#000"
-                            label="Itens da mudança (separados por vírgula)"
-                            value={itens}
-                            onChangeText={setItens}
-                            style={styles.input}
-                            theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                        />
+                <View style={styles.row}>
+                    <TextInput
+                        style={[styles.input, { flex: 1, marginRight: 8 }]}
+                        placeholder="Data (dd/mm/aaaa)"
+                        value={data}
+                        // Aplica a formatação e atualiza o estado
+                        onChangeText={(text) => setData(formatDate(text))}
+                        keyboardType="numeric"
+                        maxLength={10} // dd/mm/yyyy
+                    />
+                    <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        placeholder="Horário (hh:mm)"
+                        value={hora}
+                        // Aplica a formatação e atualiza o estado
+                        onChangeText={(text) => setHora(formatTime(text))}
+                        keyboardType="numeric"
+                        maxLength={5} // hh:mm
+                    />
+                </View>
+                
+                <View style={styles.resumo}>
+                    <Text style={styles.resumoTitle}>Resumo do Agendamento</Text>
+                    <Text style={styles.resumoItem}>• Distância: {distancia ? `${distancia} km` : 'Aguardando...'}</Text>
+                    <Text style={styles.resumoItem}>• Itens: {itens || 'Nenhum'}</Text>
+                    <Text style={styles.valorFinal}>
+                        • Valor estimado: {valorEstimado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </Text>
+                </View>
 
-                        <View style={styles.row}>
-                            <TextInput
-                                textColor="#000"
-                                label="Data"
-                                value={data}
-                                onChangeText={setData}
-                                style={[styles.input, { flex: 1, marginRight: 8 }]}
-                                placeholder="dd/mm/aaaa"
-                                theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                            />
-                            <TextInput
-                                textColor="#000"
-                                label="Horário"
-                                value={hora}
-                                onChangeText={setHora}
-                                style={[styles.input, { flex: 1 }]}
-                                placeholder="--:--"
-                                theme={{ colors: { primary: '#000', onSurfaceVariant: '#000' } }}
-                            />
-                        </View>
-                        
-                        <View style={styles.resumo}>
-                            <Text style={styles.resumoTitle}>Resumo do Agendamento</Text>
-                            <Text style={styles.resumoItem}>• Mudanceiro: {nome || 'N/A'}</Text>
-                            <Text style={styles.resumoItem}>• Distância: {distancia ? `${distancia} km` : 'Aguardando informação'}</Text>
-                            <Text style={styles.resumoItem}>• Itens: {itens || 'Nenhum item informado'}</Text>
-                            <Text style={styles.valorFinal}>
-                                • Valor estimado: {valorEstimado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                            </Text>
-                        </View>
-
-                        {/* 4. Botão atualizado para chamar a função e mostrar estado de loading */}
-                        <Button 
-                            mode="contained" 
-                            style={styles.botao} 
-                            textColor="#fff"
-                            onPress={handleAgendar}
-                            disabled={loading}
-                        >
-                            {loading ? 'Agendando...' : 'Agendar Mudança'}
-                        </Button>
-                    </Card.Content>
-                </Card>
+                <TouchableOpacity 
+                    style={styles.button} 
+                    onPress={handleAgendar}
+                    disabled={loading}
+                >
+                    <Text style={styles.buttonText}>
+                        {loading ? 'Agendando...' : 'Confirmar Agendamento'}
+                    </Text>
+                </TouchableOpacity>
                 
             </ScrollView>
             <Hotbar />
-        </PaperProvider>
+        </View>
     );
 }
 
+// Estilos unificados, baseados na tela de Login (sem alterações)
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
-        backgroundColor: '#FEF7FF',
         flexGrow: 1,
+        backgroundColor: '#FEF7FF',
+        justifyContent: 'center',
         alignItems: 'center',
+        padding: 20,
+    },
+    logo: {
+        width: 80,
+        height: 80,
+        marginBottom: 20,
     },
     title: {
         fontSize: 24,
-        marginVertical: 12,
         fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    card: {
-        width: '100%',
-        padding: 12,
-        backgroundColor: '#fff',
-    },
-    subtitle: {
-        fontSize: 18,
-        marginBottom: 12,
-        fontWeight: '600',
+        marginBottom: 20,
+        color: '#333',
     },
     input: {
-        marginBottom: 12,
+        width: '100%',
+        padding: 15,
+        borderWidth: 1,
+        borderColor: '#6C47A3',
+        borderRadius: 10,
         backgroundColor: '#fff',
+        marginBottom: 12,
+        fontSize: 16,
+    },
+    disabledInput: {
+        backgroundColor: '#f0eafc',
+        color: '#6C47A3',
+        fontWeight: 'bold',
     },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        width: '100%',
+    },
+    button: {
+        backgroundColor: '#BF5AF2',
+        padding: 15,
+        borderRadius: 25,
+        alignItems: 'center',
+        width: '100%',
+        marginTop: 10,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     resumo: {
+        width: '100%',
         marginVertical: 16,
-        backgroundColor: '#f8fafc',
-        padding: 12,
-        borderRadius: 8,
+        backgroundColor: '#f8f9fa',
+        padding: 15,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: '#e9ecef',
     },
     resumoTitle: {
         fontWeight: 'bold',
-        marginBottom: 8,
+        marginBottom: 10,
         fontSize: 16,
+        color: '#343a40',
     },
     resumoItem: {
-      marginBottom: 4,
+      marginBottom: 5,
+      fontSize: 14,
+      color: '#495057',
     },
     valorFinal: {
         fontWeight: 'bold',
-        marginTop: 6,
-        color: '#166534' // Cor verde para destacar o valor
-    },
-    botao: {
-        backgroundColor: '#d946ef',
         marginTop: 8,
-        paddingVertical: 4,
+        fontSize: 16,
+        color: '#16a34a', // Tom de verde
     },
 });
