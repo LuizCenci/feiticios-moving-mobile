@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile  } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { Lock, Mail, Truck } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -44,6 +44,7 @@ export default function Cadastro() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
       const user = userCredential.user;
+      await updateProfile(userCredential.user, { displayName: nome });
 
       await setDoc(doc(db, 'usuarios', user.uid), {
         email,
