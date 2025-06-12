@@ -4,7 +4,7 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-nativ
 import { useRouter } from 'expo-router';
 import { collection, doc, getDocs } from 'firebase/firestore';
 import { auth, db } from '../src/config/firebaseconfig';
-import Hotbar from './components/hotbar';
+import HotbarMudanceiro from './components/hotbarMudanceiro';
 
 export default function HistoricoMudancas() {
   const router = useRouter();
@@ -102,7 +102,7 @@ export default function HistoricoMudancas() {
           extraData={mudancas} // Garante que a lista atualize quando o estado 'mudancas' mudar
         />
       )}
-      <Hotbar></Hotbar>
+      <HotbarMudanceiro></HotbarMudanceiro>
     </View>
   );
 };
