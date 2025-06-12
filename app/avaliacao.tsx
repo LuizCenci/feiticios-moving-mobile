@@ -1,5 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 import { addDoc, collection, getFirestore, Timestamp } from 'firebase/firestore';
 import { useState } from 'react';
 import {
@@ -26,6 +27,9 @@ const Avaliacao = () => {
     atendimento: 0,
   });
   const [feedback, setFeedback] = useState('');
+
+  const { mudanceiroId, agendamentoId } = useLocalSearchParams();
+  const user = getAuth().currentUser;
 
   const renderStars = (category: keyof typeof avaliacoes) => {
     const stars = [];
@@ -58,12 +62,22 @@ const Avaliacao = () => {
       usuarioId: user.uid,
     };
 
+    await addDoc(collection(db, "usuarios", mudanceiroId as string, "avaliacoes"), {
+      clienteId: user?.uid,
+      clienteEmail: user?.email,
+      mudanceiroId: mudanceiroId,
+      agendamentoId: agendamentoId,
+      estrelas: avaliacoes,
+      feedback,
+      dataCriacao: new Date(),
+    });
+
     try {
       await addDoc(collection(db, 'avaliacoes'), novaAvaliacao);
       Alert.alert('Sucesso', 'Avaliação enviada com sucesso!');
       setAvaliacoes({ tempo: 0, itens: 0, atendimento: 0 });
       setFeedback('');
-      router.push('/');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Erro ao enviar avaliação:', error);
       Alert.alert('Erro', 'Erro ao enviar avaliação. Tente novamente.');
@@ -100,7 +114,6 @@ const Avaliacao = () => {
           <Text style={styles.buttonText}>Enviar Avaliação</Text>
         </TouchableOpacity>
 
-        {/* Imagem centralizada no final */}
         <View style={styles.logoWrapper}>
           <Image source={require('../assets/images/cauldron.png')} style={styles.logo} />
         </View>
