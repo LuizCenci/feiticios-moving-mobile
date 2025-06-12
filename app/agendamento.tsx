@@ -161,19 +161,19 @@ export default function Agendamento() {
                         style={[styles.input, { flex: 1, marginRight: 8 }]}
                         placeholder="Data (dd/mm/aaaa)"
                         value={data}
-                        // Aplica a formatação e atualiza o estado
+                        
                         onChangeText={(text) => setData(formatDate(text))}
                         keyboardType="numeric"
-                        maxLength={10} // dd/mm/yyyy
+                        maxLength={10} 
                     />
                     <TextInput
                         style={[styles.input, { flex: 1 }]}
                         placeholder="Horário (hh:mm)"
                         value={hora}
-                        // Aplica a formatação e atualiza o estado
+                    
                         onChangeText={(text) => setHora(formatTime(text))}
                         keyboardType="numeric"
-                        maxLength={5} // hh:mm
+                        maxLength={5} 
                     />
                 </View>
                 
@@ -202,7 +202,6 @@ export default function Agendamento() {
     );
 }
 
-// Estilos unificados, baseados na tela de Login (sem alterações)
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
@@ -279,6 +278,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 8,
         fontSize: 16,
-        color: '#16a34a', // Tom de verde
+        color: '#16a34a',
     },
 });

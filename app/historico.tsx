@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-// Importações necessárias do Firebase e React Native
 import { useRouter } from 'expo-router';
 import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../src/config/firebaseconfig';
 import Hotbar from './components/hotbar';
 
@@ -12,7 +11,6 @@ export default function HistoricoMudancas() {
   const [loading, setLoading] = useState(true);
   const [mensagem, setMensagem] = useState('');
 
-  // 1. A função de estado de status foi removida daqui.
 
   useEffect(() => {
     const fetchMudancas = async () => {
@@ -58,25 +56,20 @@ export default function HistoricoMudancas() {
     return () => unsubscribe();
   }, []);
   
-  // 2. Lógica para finalizar a mudança e atualizar o status
   const handleFinalizarMudanca = async (itemParaAtualizar) => {
     try {
-      // Referência ao documento no Firestore
       const agendamentoRef = doc(db, 'usuarios', auth.currentUser.uid, 'agendamentos', itemParaAtualizar.id);
 
-      // Atualiza o documento no Firestore
       await updateDoc(agendamentoRef, {
         status: 'Finalizado'
       });
 
-      // Atualiza o estado local para refletir a mudança na UI instantaneamente
       setMudancas(currentMudancas => 
         currentMudancas.map(m => 
           m.id === itemParaAtualizar.id ? { ...m, status: 'Finalizado' } : m
         )
       );
 
-      // Navega para a tela de avaliação após o sucesso
       router.push({ 
         pathname: '/avaliacao', 
         params: { 
@@ -97,7 +90,6 @@ export default function HistoricoMudancas() {
       <Text style={styles.cardText}><Text style={styles.label}>Origem:</Text> {item.enderecoOrigem || 'Não informado'}</Text>
       <Text style={styles.cardText}><Text style={styles.label}>Destino:</Text> {item.enderecoDestino || 'Não informado'}</Text>
       <Text style={styles.cardText}><Text style={styles.label}>Data:</Text> {item.dataAgendamento} </Text>
-      {/* 4. Exibe o status diretamente do item */}
       <Text style={styles.cardText}><Text style={styles.label}>Status:</Text> {item.status || 'Não informado'}</Text>
       <Text style={styles.cardText}><Text style={styles.label}>Mudanceiro:</Text> {item.mudanceiroNome}</Text>
       <Text style={styles.cardText}><Text style={styles.label}>Valor:</Text> R$ {item.valorEstimado || '0,00'}</Text>
@@ -142,7 +134,7 @@ export default function HistoricoMudancas() {
           renderItem={renderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.container}
-          extraData={mudancas} // Garante que a lista atualize quando o estado 'mudancas' mudar
+          extraData={mudancas}
         />
       )}
       <Hotbar></Hotbar>
@@ -162,7 +154,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FEF7FF', // Adicionado para consistência
+    backgroundColor: '#FEF7FF', 
   },
   card: {
     backgroundColor: '#fff',
@@ -172,7 +164,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 3, // Adicionado para sombra no Android
+    elevation: 3, 
   },
   cardText: {
     fontSize: 16,

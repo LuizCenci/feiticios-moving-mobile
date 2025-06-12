@@ -1,9 +1,9 @@
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword, updateProfile  } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { Lock, Mail, Truck } from 'lucide-react-native';
 import React, { useState } from 'react';
-import {Image, ScrollView, Text, TextInput, TouchableOpacity, View, StyleSheet,} from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
 import { auth, db } from '../src/config/firebaseconfig';
 
 export default function Cadastro() {
@@ -76,7 +76,6 @@ export default function Cadastro() {
         />
         <Text style={styles.title}>Criar conta</Text>
 
-        {/* Nome */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Nome completo:</Text>
           <View style={styles.inputWrapper}>
@@ -89,7 +88,6 @@ export default function Cadastro() {
           </View>
         </View>
 
-        {/* Data de nascimento */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Data de nascimento:</Text>
           <View style={styles.inputWrapper}>
@@ -103,7 +101,6 @@ export default function Cadastro() {
           </View>
         </View>
 
-        {/* CPF */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>CPF:</Text>
           <View style={styles.inputWrapper}>
@@ -117,7 +114,6 @@ export default function Cadastro() {
           </View>
         </View>
 
-        {/* E-mail */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>E-mail:</Text>
           <View style={[styles.inputWrapper, styles.iconInputWrapper]}>
@@ -131,7 +127,6 @@ export default function Cadastro() {
           </View>
         </View>
 
-        {/* Senha */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Senha:</Text>
           <View style={[styles.inputWrapper, styles.iconInputWrapper]}>
@@ -146,7 +141,6 @@ export default function Cadastro() {
           </View>
         </View>
 
-        {/* Tipo de usuário */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Tipo de usuário:</Text>
           <View style={styles.userTypeWrapper}>

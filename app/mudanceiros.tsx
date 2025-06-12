@@ -75,12 +75,10 @@ export default function Mudanceiros() {
     const promises = mudanceirosFiltrados.map(doc => getMudanceiroCompleto(doc.id));
     const completos = await Promise.all(promises);
 
-    // Se não houver filtros selecionados, retorna todos (filtra apenas nulos)
     if (servicosSelecionados.length === 0) {
         return completos.filter(Boolean) as Mudanceiro[];
     }
 
-    // Se houver filtros selecionados, aplica o filtro
     const mudanceirosFiltradosPorServico = completos.filter(mudanceiro =>
         mudanceiro && mudanceiro.servicos.some(servico =>
             servicosSelecionados.includes(servico.tipo)
@@ -208,20 +206,20 @@ const styles = StyleSheet.create({
   },
   row: {
   flexDirection: 'row',
-  alignItems: 'center', // para alinhar verticalmente no centro
+  alignItems: 'center', 
   },
   filterIcon: {
-    width: '100%', // ocupa toda a largura disponível da tela
-    alignItems: 'center', // centraliza o conteúdo dentro do botão
+    width: '100%', 
+    alignItems: 'center', 
     backgroundColor: '#9b59b6',
     padding: 12,
     flexDirection: 'row',
-    justifyContent: 'center', // centraliza texto e ícone na horizontal
-    marginRight: 0, // removendo margem desnecessária
+    justifyContent: 'center', 
+    marginRight: 0, 
   },
 
   labelRow: {
-    width: '100%', // a linha também precisa ocupar 100% para o botão se expandir
+    width: '100%', 
     marginBottom: 8,
     flexDirection: 'row',
     justifyContent:'flex-end',
