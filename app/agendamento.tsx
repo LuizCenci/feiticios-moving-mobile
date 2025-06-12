@@ -1,9 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-// 1. Importações necessárias do Firebase (sem alterações na lógica)
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection } from 'firebase/firestore';
 import { useEffect, useMemo, useState } from 'react';
-// 2. Componentes nativos do React Native para estilização consistente
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { db } from '../src/config/firebaseconfig';
 import Hotbar from './components/hotbar';
@@ -12,7 +10,6 @@ export default function Agendamento() {
     const router = useRouter(); 
     const { nome, valorBase, mudanceiroId } = useLocalSearchParams();
 
-    // Estados do formulário e de controle
     const [origem, setOrigem] = useState('');
     const [destino, setDestino] = useState('');
     const [itens, setItens] = useState('');
@@ -22,7 +19,6 @@ export default function Agendamento() {
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState(null);
 
-    // Efeito para obter o usuário autenticado
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -35,7 +31,6 @@ export default function Agendamento() {
         return () => unsubscribe();
     }, []);
     
-    // Lógica de cálculo do valor estimado
     const valorEstimado = useMemo(() => {
         const base = parseFloat(valorBase as string) || 0;
         const km = parseFloat(distancia) || 0;
@@ -44,13 +39,10 @@ export default function Agendamento() {
         return base + (km * PRECO_POR_KM);
     }, [distancia, valorBase]);
 
-    // 3. Funções de formatação CORRIGIDAS para data e hora
     const formatDate = (text: string) => {
-        // Remove tudo que não for dígito
         const cleaned = text.replace(/\D/g, '');
         const cleanedLength = cleaned.length;
 
-        // Formata dd/mm/yyyy dinamicamente
         if (cleanedLength > 4) {
             return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
         } else if (cleanedLength > 2) {
@@ -61,11 +53,9 @@ export default function Agendamento() {
     };
 
     const formatTime = (text: string) => {
-        // Remove tudo que não for dígito
         const cleaned = text.replace(/\D/g, '');
         const cleanedLength = cleaned.length;
 
-        // Formata hh:mm dinamicamente
         if (cleanedLength > 2) {
             return `${cleaned.slice(0, 2)}:${cleaned.slice(2, 4)}`;
         }
@@ -73,7 +63,6 @@ export default function Agendamento() {
         return cleaned;
     };
 
-    // Função para lidar com o agendamento
     const handleAgendar = async () => {
         if (!user) {
             Alert.alert('Erro', 'Você precisa estar logado para agendar uma mudança.');
@@ -90,6 +79,23 @@ export default function Agendamento() {
                 mudanceiroNome: nome,
                 mudanceiroId: mudanceiroId,
                 clienteId: user.uid,
+                clienteNome: user.email,
+                enderecoOrigem: origem,
+                enderecoDestino: destino,
+                itens: itens.split(',').map(item => item.trim()).filter(item => item),
+                dataAgendamento: data,
+                horaAgendamento: hora,
+                distanciaKm: parseFloat(distancia),
+                valorEstimado: valorEstimado,
+                status: 'agendado',
+                dataCriacao: new Date(),
+            });
+            const agendamentosCollectionRef1 = collection(db, 'usuarios', mudanceiroId, 'agendamentos');
+            await addDoc(agendamentosCollectionRef1, {
+                mudanceiroNome: nome,
+                mudanceiroId: mudanceiroId,
+                clienteId: user.uid,
+                clienteNome: user.email,
                 enderecoOrigem: origem,
                 enderecoDestino: destino,
                 itens: itens.split(',').map(item => item.trim()).filter(item => item),

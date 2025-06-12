@@ -1,105 +1,167 @@
-import { CalendarDays } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import HotbarMudanceiro from './components/hotbarMudanceiro';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+// Importações necessárias do Firebase e React Native
+import { useRouter } from 'expo-router';
+import { collection, doc, getDocs } from 'firebase/firestore';
+import { auth, db } from '../src/config/firebaseconfig';
+import Hotbar from './components/hotbar';
 
-const servicosAgendados = [
-  {
-    id: '1',
-    data: '12/06/2025',
-    cliente: 'João Silva',
-    endereco: 'Rua das Flores, 123',
-    horario: '09:00',
-  },
-  {
-    id: '2',
-    data: '14/06/2025',
-    cliente: 'Maria Oliveira',
-    endereco: 'Av. Brasil, 456',
-    horario: '14:30',
-  },
-];
+export default function HistoricoMudancas() {
+  const router = useRouter();
+  const [mudancas, setMudancas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [mensagem, setMensagem] = useState('');
 
-const Agenda = () => {
+  // 1. A função de estado de status foi removida daqui.
+
+  useEffect(() => {
+    const fetchMudancas = async () => {
+      setLoading(true);
+      const user = auth.currentUser;
+
+      if (!user) {
+        setMensagem('Usuário não autenticado.');
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const agendamentosRef = collection(doc(db, 'usuarios', user.uid), 'agendamentos');
+        const querySnapshot = await getDocs(agendamentosRef);
+
+        if (querySnapshot.empty) {
+          setMensagem('Você ainda não tem mudanças registradas.');
+        } else {
+          const mudancasList = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setMudancas(mudancasList);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar agendamentos: ", error);
+        setMensagem("Ocorreu um erro ao buscar seu histórico.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        fetchMudancas();
+      } else {
+        setLoading(false);
+        setMensagem('Por favor, faça login para ver seu histórico.');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.cardText}><Text style={styles.label}>Origem:</Text> {item.enderecoOrigem || 'Não informado'}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Destino:</Text> {item.enderecoDestino || 'Não informado'}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Data:</Text> {item.dataAgendamento} </Text>
+      {/* 4. Exibe o status diretamente do item */}
+      <Text style={styles.cardText}><Text style={styles.label}>Status:</Text> {item.status || 'Não informado'}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Cliente:</Text> {item.clienteNome}</Text>
+      <Text style={styles.cardText}><Text style={styles.label}>Valor:</Text> R$ {item.valorEstimado || '0,00'}</Text>
+      <View style={styles.itemsContainer}>
+        <Text style={styles.label}>Itens da Mudança:</Text>
+        {item.itens.map((item, index) =>
+        <Text key={index} style={styles.itemText}>
+          -{item}
+        </Text>
+        )}
+      </View>
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6C47A3" />
+        <Text>Buscando seu histórico...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={{flex:1}}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.titulo}>Agenda de Serviços</Text>
-
-        {servicosAgendados.map((servico) => (
-          <View key={servico.id} style={styles.card}>
-            <View style={styles.row}>
-              <CalendarDays color="#6C47A3" size={20} />
-              <Text style={styles.data}>{servico.data}</Text>
-            </View>
-            <Text style={styles.texto}><Text style={styles.label}>Cliente:</Text> {servico.cliente}</Text>
-            <Text style={styles.texto}><Text style={styles.label}>Endereço:</Text> {servico.endereco}</Text>
-            <Text style={styles.texto}><Text style={styles.label}>Horário:</Text> {servico.horario}</Text>
-          </View>
-        ))}
-
-        <TouchableOpacity style={styles.botao}>
-          <Text style={styles.botaoTexto}>Ver calendário completo</Text>
-        </TouchableOpacity>
-      </ScrollView>
-      <HotbarMudanceiro></HotbarMudanceiro>
+    <View style={{ flex: 1, backgroundColor: '#FEF7FF' }}>
+      {mudancas.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <Text>{mensagem}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={mudancas}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.container}
+          extraData={mudancas} // Garante que a lista atualize quando o estado 'mudancas' mudar
+        />
+      )}
+      <Hotbar></Hotbar>
     </View>
   );
 };
 
-export default Agenda;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#FEF7FF',
     padding: 20,
+    paddingBottom: 50,
+    flexGrow: 1,
   },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#6C47A3',
-    marginBottom: 20,
-    textAlign: 'center',
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FEF7FF', // Adicionado para consistência
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 5,
+    elevation: 3, // Adicionado para sombra no Android
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  data: {
-    marginLeft: 8,
-    fontWeight: 'bold',
-    color: '#6C47A3',
+  cardText: {
     fontSize: 16,
-  },
-  texto: {
-    fontSize: 14,
-    marginBottom: 5,
+    marginBottom: 8,
+    color: '#333',
   },
   label: {
     fontWeight: 'bold',
+    color: '#000',
   },
-  botao: {
+  button: {
     backgroundColor: '#BF5AF2',
     paddingVertical: 12,
+    paddingHorizontal: 30,
     borderRadius: 25,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 16,
   },
-  botaoTexto: {
+  buttonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  itemsContainer: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderColor: '#eee',
+  },
+  itemText: {
+    fontSize: 15,
+    color: '#555',
+    marginLeft: 10,
+    marginTop: 5,
   },
 });

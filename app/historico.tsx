@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // Importações necessárias do Firebase e React Native
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../src/config/firebaseconfig'; 
-import Hotbar from './components/hotbar';
 import { useRouter } from 'expo-router';
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { auth, db } from '../src/config/firebaseconfig';
+import Hotbar from './components/hotbar';
 
 export default function HistoricoMudancas() {
   const router = useRouter();
