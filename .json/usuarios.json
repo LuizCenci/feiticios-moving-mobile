@@ -1,0 +1,220 @@
+{
+  "2FQVGNbxSKRdqA8vLo9tjmRV1pk2": {
+    "nome": "Matheus de Aquino",
+    "email": "matheuss@gmail.com",
+    "tipoUsuario": "cliente",
+    "cpf": "161.616.161-61",
+    "dataNascimento": "14/09/2005",
+    "agendamentos": {
+      "Nv2VlmFQClolyJNpxLGx": {
+        "enderecoOrigem": "Chopinzinho",
+        "clienteNome": "matheuss@gmail.com",
+        "dataCriacao": {
+          "_seconds": 1749746229,
+          "_nanoseconds": 307000000
+        },
+        "horaAgendamento": "15:00",
+        "valorEstimado": 602,
+        "clienteId": "2FQVGNbxSKRdqA8vLo9tjmRV1pk2",
+        "mudanceiroNome": "Lucas Bonissoni",
+        "itens": [
+          "sofá",
+          "geladeira",
+          "cama"
+        ],
+        "dataAgendamento": "12/06/2025",
+        "enderecoDestino": "Coronel Vivida",
+        "distanciaKm": 17,
+        "mudanceiroId": "tqm6ETVcXrcpAZjqkqFAP5FtpjT2",
+        "status": "Finalizado"
+      }
+    }
+  },
+  "HUfja3AUb9PrK0rgoKtZJeEdmJs1": {
+    "email": "mudanceiro@example.com",
+    "cpf": "123.445.608-09",
+    "nome": "Mudanceiro",
+    "dataNascimento": "12/06/2000",
+    "tipoUsuario": "mudanceiro",
+    "agendamentos": {
+      "R2hD6jUlX0oERK3pQRHa": {
+        "horaAgendamento": "18:00",
+        "itens": [
+          "Cama",
+          "Guarda-Roupa"
+        ],
+        "dataAgendamento": "30/06/2025",
+        "enderecoOrigem": "Dois Vizinhos ",
+        "clienteNome": "cliente@example.com",
+        "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1",
+        "status": "agendado",
+        "distanciaKm": 70,
+        "valorEstimado": 820,
+        "clienteId": "yKp7Ip40FpQgPiqGTXNQr3iVCCy1",
+        "mudanceiroNome": "Mudanceiro",
+        "enderecoDestino": "Chopinzinho",
+        "dataCriacao": {
+          "_seconds": 1749735968,
+          "_nanoseconds": 559000000
+        }
+      },
+      "glK5vTMsP3xlNnJxgGn6": {
+        "clienteNome": "cliente@example.com",
+        "dataAgendamento": "30/06/2025",
+        "enderecoOrigem": "Chopinzinho",
+        "enderecoDestino": "Dois Vizinhos",
+        "itens": [
+          "Guarda-Roupa",
+          "Cama",
+          "Geladeira"
+        ],
+        "horaAgendamento": "14:00",
+        "clienteId": "yKp7Ip40FpQgPiqGTXNQr3iVCCy1",
+        "distanciaKm": 70,
+        "valorEstimado": 820,
+        "status": "agendado",
+        "dataCriacao": {
+          "_seconds": 1749732790,
+          "_nanoseconds": 607000000
+        },
+        "mudanceiroNome": "Mudanceiro",
+        "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1"
+      }
+    },
+    "avaliacoes": {
+      "2hgDOha4DnrPRvfh5Yuf": {
+        "clienteEmail": "cliente@example.com",
+        "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1",
+        "estrelas": {
+          "itens": 5,
+          "atendimento": 4,
+          "tempo": 4
+        },
+        "agendamentoId": "fxKITpQ38fQN9Lsl3ZE7",
+        "dataCriacao": {
+          "_seconds": 1749732822,
+          "_nanoseconds": 969000000
+        },
+        "clienteId": "yKp7Ip40FpQgPiqGTXNQr3iVCCy1",
+        "feedback": "Bom atendimento e cuidado com meus itens"
+      },
+      "ofX2ucmkFWAYbszNdw0X": {
+        "agendamentoId": "dQtlGK1TGuiHk0pZcNEe",
+        "feedback": "Boa entrega",
+        "estrelas": {
+          "atendimento": 4,
+          "tempo": 4,
+          "itens": 4
+        },
+        "clienteId": "yKp7Ip40FpQgPiqGTXNQr3iVCCy1",
+        "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1",
+        "dataCriacao": {
+          "_seconds": 1749736023,
+          "_nanoseconds": 677000000
+        },
+        "clienteEmail": "cliente@example.com"
+      }
+    }
+  },
+  "tqm6ETVcXrcpAZjqkqFAP5FtpjT2": {
+    "dataNascimento": "10/10/2000",
+    "email": "lucasb@gmail.com",
+    "nome": "Lucas Bonissoni",
+    "tipoUsuario": "mudanceiro",
+    "cpf": "141.414.141-41",
+    "agendamentos": {
+      "a3YlMeD3PoKedNdnm8VY": {
+        "itens": [
+          "sofá",
+          "geladeira",
+          "cama"
+        ],
+        "status": "agendado",
+        "mudanceiroId": "tqm6ETVcXrcpAZjqkqFAP5FtpjT2",
+        "mudanceiroNome": "Lucas Bonissoni",
+        "dataAgendamento": "12/06/2025",
+        "enderecoDestino": "Coronel Vivida",
+        "valorEstimado": 602,
+        "dataCriacao": {
+          "_seconds": 1749746229,
+          "_nanoseconds": 483000000
+        },
+        "enderecoOrigem": "Chopinzinho",
+        "clienteId": "2FQVGNbxSKRdqA8vLo9tjmRV1pk2",
+        "horaAgendamento": "15:00",
+        "distanciaKm": 17,
+        "clienteNome": "matheuss@gmail.com"
+      }
+    },
+    "avaliacoes": {
+      "3OXNagaUqQzyxWeTgfCb": {
+        "estrelas": {
+          "atendimento": 5,
+          "tempo": 5,
+          "itens": 5
+        },
+        "feedback": "Bom serviço!!!",
+        "dataCriacao": {
+          "_seconds": 1749746285,
+          "_nanoseconds": 512000000
+        },
+        "mudanceiroId": "tqm6ETVcXrcpAZjqkqFAP5FtpjT2",
+        "clienteEmail": "matheuss@gmail.com",
+        "clienteId": "2FQVGNbxSKRdqA8vLo9tjmRV1pk2",
+        "agendamentoId": "Nv2VlmFQClolyJNpxLGx"
+      }
+    }
+  },
+  "yKp7Ip40FpQgPiqGTXNQr3iVCCy1": {
+    "email": "cliente@example.com",
+    "dataNascimento": "12/06/2000",
+    "cpf": "102.102.102-01",
+    "tipoUsuario": "cliente",
+    "nome": "Cliente Teste",
+    "agendamentos": {
+      "dQtlGK1TGuiHk0pZcNEe": {
+        "clienteNome": "cliente@example.com",
+        "dataAgendamento": "30/06/2025",
+        "dataCriacao": {
+          "_seconds": 1749735968,
+          "_nanoseconds": 427000000
+        },
+        "enderecoOrigem": "Dois Vizinhos ",
+        "clienteId": "yKp7Ip40FpQgPiqGTXNQr3iVCCy1",
+        "itens": [
+          "Cama",
+          "Guarda-Roupa"
+        ],
+        "horaAgendamento": "18:00",
+        "enderecoDestino": "Chopinzinho",
+        "distanciaKm": 70,
+        "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1",
+        "mudanceiroNome": "Mudanceiro",
+        "valorEstimado": 820,
+        "status": "Finalizado"
+      },
+      "fxKITpQ38fQN9Lsl3ZE7": {
+        "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1",
+        "distanciaKm": 70,
+        "clienteId": "yKp7Ip40FpQgPiqGTXNQr3iVCCy1",
+        "enderecoDestino": "Dois Vizinhos",
+        "clienteNome": "cliente@example.com",
+        "enderecoOrigem": "Chopinzinho",
+        "itens": [
+          "Guarda-Roupa",
+          "Cama",
+          "Geladeira"
+        ],
+        "dataCriacao": {
+          "_seconds": 1749732790,
+          "_nanoseconds": 474000000
+        },
+        "horaAgendamento": "14:00",
+        "dataAgendamento": "30/06/2025",
+        "valorEstimado": 820,
+        "mudanceiroNome": "Mudanceiro",
+        "status": "Finalizado"
+      }
+    }
+  }
+}

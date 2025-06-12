@@ -1,0 +1,28 @@
+{
+  "aM4N8OURhIkcrlDrD4kt": {
+    "preco": "400,00",
+    "mudanceiroId": "HUfja3AUb9PrK0rgoKtZJeEdmJs1",
+    "tipoServico": "Mudança Residencial",
+    "contato": "mudanceiro@example.com",
+    "descricao": "Atendemos toda a região, com toda a mão de obra necessária para a mudança",
+    "criadoEm": {
+      "_seconds": 1749732670,
+      "_nanoseconds": 193000000
+    },
+    "cep": "85560000",
+    "veiculo": "Caminhão Médio"
+  },
+  "huY3xdtCWNXQoOPnI0MY": {
+    "mudanceiroId": "tqm6ETVcXrcpAZjqkqFAP5FtpjT2",
+    "preco": "500",
+    "descricao": "Disponibilidade também  nos fins de semana.",
+    "contato": "lucasb@gmail.com",
+    "cep": "85560000",
+    "veiculo": "Caminhão grande",
+    "criadoEm": {
+      "_seconds": 1749745698,
+      "_nanoseconds": 927000000
+    },
+    "tipoServico": "Mudança Residencial"
+  }
+}
