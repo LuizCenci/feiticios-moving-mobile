@@ -1,18 +1,27 @@
 
 import { useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 import { Calendar, ClipboardList, AlignJustify  } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect, useState} from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import Hotbar from './components/hotbar';
 import HotbarMudanceiro from './components/hotbarMudanceiro';
 export default function DashboardMudanceiro() {
   const router = useRouter();
+  const [userName, setUserName] = useState(''); 
+  const auth = getAuth();
+  useEffect(() => {
+      const user = auth.currentUser;
+      if (user) {
+        setUserName(user.displayName); 
+      }
+    }, []);
 
   return (
     <View style={{flex:1}}>
       <ScrollView contentContainerStyle={styles.container}>
       <Image source={require('../assets/images/cauldron.png')} style={styles.logo} />
-      <Text style={styles.title}>Olá, Mudanceiro!</Text>
+      <Text style={styles.title}>Olá, {userName}!</Text>
       <Text style={styles.subtitle}>O que deseja fazer?</Text>
 
       <TouchableOpacity

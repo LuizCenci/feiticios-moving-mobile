@@ -3,15 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile  } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { Lock, Mail, Truck } from 'lucide-react-native';
 import React, { useState } from 'react';
-import {
-  Image,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-} from 'react-native';
+import {Image, ScrollView, Text, TextInput, TouchableOpacity, View, StyleSheet,} from 'react-native';
 import { auth, db } from '../src/config/firebaseconfig';
 
 export default function Cadastro() {
